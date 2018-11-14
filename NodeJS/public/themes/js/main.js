@@ -1,4 +1,8 @@
 $(document).ready(function () {
+    var header = document.getElementById("myHeader");
+    var sticky = header.offsetTop;
+    window.onscroll = function() {myFunction(sticky)};
+
     $('.fdi-Carousel .item').each(function () {
         var next = $(this).next();
         if (!next.length) {
@@ -21,4 +25,20 @@ $(document).ready(function () {
     $("button[name='search']").on('click', function (e) {
         window.location.href = "/?search=" + $("input[name='search']").val();
    });
+
+    $("#addClass").click(function () {
+        $('#qnimate').addClass('popup-box-on');
+    });
+
+    $("#removeClass").click(function () {
+        $('#qnimate').removeClass('popup-box-on');
+    });
 });
+
+function myFunction(sticky) {
+  if (window.pageYOffset > sticky) {
+    header.classList.add("sticky");
+  } else {
+    header.classList.remove("sticky");
+  }
+}

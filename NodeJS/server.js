@@ -12,6 +12,9 @@ var passportLocalMongoose = require("passport-local-mongoose");
 var multer  = require('multer');
 var cookieParser = require('cookie-parser');
 var mongoose = require("mongoose");
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+var port = process.env.PORT || 3000;
  
 var MongoClient = mongodb.MongoClient;
 
@@ -21,7 +24,7 @@ var autoIncrement = require("mongodb-autoincrement");
 //var url = 'mongodb://localhost:27017/test';
 var url = 'mongodb://nhatanh285:hna2851992@ds113835.mlab.com:13835/nhatanh_test';
 // Number of page
-var numberPager = 4;
+var numberPager = 20;
 
 var connection = new connectOnce({ 
     retries: 60, 
@@ -45,6 +48,19 @@ var transporter = nodemailer.createTransport({
     user: 'nhatanh2852@gmail.com',
     pass: 'hna2851993'
   }
+});
+
+//IO
+io.on('connection', function(socket){
+	console.log("socket: " + socket);
+  socket.on('chat message', function(msg){
+  	console.log("MSG:" + msg);
+    io.emit('chat message', msg);
+  });
+});
+
+http.listen(port, function(){
+  console.log('listening on *:' + port);
 });
 
 //app.use(expressValidator);
@@ -99,7 +115,7 @@ var uploadMultiFile = multer({ storage: storage }).array('multiFile');
 app.use(express.static("public"));
 app.set("view engine", "ejs");
 app.set("views", "./views");
-app.listen(8080);
+//app.listen(8080);
 
 app.get("/", function(req, res){
 	var pageStr = req.query.page;
@@ -284,6 +300,10 @@ app.get("/add_product", function(req, res){
  
         );
     });
+});
+
+app.get('/io_chat', function(req, res){
+  res.render("iochat");
 });
 
 app.post("/saveData", function(req, res){
