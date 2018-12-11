@@ -4,14 +4,19 @@
       <div class="modal-content">
         <div class="modal-body">
           <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <form class="modal-content animate" method="POST" action="/login">
+          <form class="animate" method="POST" action="/login">
             <div class="imgcontainer">
               <img src="themes/images/icon_user.png">
             </div>
 
             <div class="container_login">
-              <label for="uname"><b>Username</b></label>
-              <input type="text" class="user_name" placeholder="Enter Username" name="username" required>
+              <div class="">
+              <a href="/auth/google" class="btn btn-danger btn-md" role="button"><span class="glyphicon glyphicon-user"></span> Sign in with Google</a><br><br>
+              <a href="/auth/facebook" class="btn btn-primary btn-md" role="button"><span class="glyphicon glyphicon-user"></span> Sign in with Facebook</a>
+              </div>
+              <br>
+              <label for="uname"><b>Email</b></label>
+              <input type="email" class="user_name" placeholder="Enter Email" name="username" required>
 
               <label for="psw"><b>Password</b></label>
               <input type="password" placeholder="Enter Password" name="password" required>
@@ -23,8 +28,10 @@
             </div>
 
             <div class="container_login" style="background-color:#f1f1f1">
-              <button type="button" class="cancelbtn">Cancel</button>
-              <span class="psw">Forgot <a href="#">password?</a></span>
+              <button type="button" class="cancelbtn" data-dismiss="modal">Cancel</button>
+              <span class="psw">
+                <a data-toggle="modal" id="create_account" data-dismiss="modal" data-target="#modal_singup" style="color:#337ab7">Create account</a> or <a href="#" style="color:#337ab7">reset password</a>
+              </span>
             </div>
           </form>
         </div>

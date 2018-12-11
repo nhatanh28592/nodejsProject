@@ -26,7 +26,7 @@ $(document).ready(function(){
 		        dataType: 'json',
 		        contentType: 'application/json; charset=utf-8',
 		        success: function (data) {  
-		         	$(".product_add").text(data.product_total);
+		         	$(".product_add").text("[" + data.product_total + "]");
 		         	$("div.btnCart").removeClass("disabled");
 		         	swal({
 						 title: "Thông báo",

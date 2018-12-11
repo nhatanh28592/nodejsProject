@@ -4,40 +4,61 @@
 	<div class="row">
 		<div class="col-sm-2">
 		</div>
+		<div class="col-sm-2">
+         <a href="/">
+         	<img src="themes/img/logo.png" style="float:left;border: 0px solid #a1a1a1;">
+         </a>
+        </div>
 		<div class="col-sm-8">
 			<div class="row row1">
 	            
 	        </div>
 	        <div class="row row2">
-	            <div class="col-sm-3">
-	             <a href="/">
-	             	<img src="themes/img/logo.png" style="float:left">	<h3 style="margin:0px;"><span class="largenav">HOÀNG PHI</span></h3>
-	             </a>
-	            </div>
-	            <div class="col-sm-6">
+	            <div class="col-sm-7">
 	                <div class="row">
-	                    <input class="form-control" type="text" name="search" placeholder="Tìm kiếm sản phẩm">
+		                <div id="custom-search-input">
+			                <div class="input-group col-md-12">
+			                    <input class="form-control" type="text" name="search" placeholder="Tìm kiếm sản phẩm">
+			                    <span class="input-group-btn">
+			                        <button class="btn btn-info" name="search" type="button">
+			                            <span class="glyphicon glyphicon-search"></span>
+			                        </button>
+			                    </span>
+			                </div>
+			            </div>
 	                </div>
 	                <div class="alert alert-success" style="display:none; border: 1px solid red">
-					    	<strong style="color:red">1 sản phẩm </strong> được thêm thành công vào giỏ hàng click vào giỏ hàng để xem chi tiết
+					    <strong style="color:red">1 sản phẩm </strong> được thêm thành công vào giỏ hàng click vào giỏ hàng để xem chi tiết
 					</div>
 	            </div>
-	            <div class="col-sm-1">
-		            <button  class="btn btn-primary" name="search">
-			          <span style="color:black" class="glyphicon glyphicon-search"></span> 
-			        </button>
-	            </div>
-	            <div class="col-sm-1 btnCart <% if(total_product == 0) { %>disabled<%}%>">
-	            	<a href="buy_now"><span class="btn btn-primary"><i class="icon-shopping-cart icon-white"></i> [<span style="color:red;font-weight:bold;" class="product_add"><%= total_product %></span>] </span> </a> 
-	            </div>
-	            <div class="col-sm-1">
-		            <button  class="btn btn-primary" name="login" data-toggle="modal" data-target="#modal_login">
-			          Login
-			        </button>
-	            </div>
+	            <div class="col-sm-4">
+	                <ul class="nav navbar-nav navbar-right">
+				      <li class="btn-info <% if(total_product == 0) { %> disabled<%}%>">
+				     	 <a href="buy_now"><span class="glyphicon glyphicon-shopping-cart product_add"><span class="product_add" style="color:red;font-weight: bold;">[<%= total_product %>]</span></span></a>
+				      </li>
+				      <% if(user){ %>
+				      		<li class="btn-success"><a href="#"><span class="glyphicon glyphicon-user"></span> <%= user.user_name %></a></li>
+				      		<input type="hidden" name="user" value="<%= user.user_name %>">
+				      		<% if(user.facebook_id){ %>
+				      			<input type="hidden" name="key" value="<%= user.facebook_id %>">
+				      			<input type="hidden" name="url_picture_user" value="http://graph.facebook.com/<%= user.facebook_id %>/picture?type=normal">
+				      		<% } else { %>
+				      			<input type="hidden" name="url_picture_user" value="<%= user.picture %>">
+				      			<% if(user.google_id){ %>
+				      				<input type="hidden" name="key" value="<%= user.google_id %>">
+					      		<% } else { %>
+									<input type="hidden" name="key" value="<%= user.user_name %>">
+					      		<% } %>
+				      		<% } %>
+		            		<li class="btn-warning"><a href="logout"><span class="glyphicon glyphicon-log-in"></span> Logout</a></li>
+						<% } else{ %>
+						<li class="btn-success" name="login" data-toggle="modal" data-target="#modal_login"><a href="#"><span class="glyphicon glyphicon-user"></span> Login</a></li>
+					  <% } %>
+				    </ul>
+				</div>
 	        </div>
 		</div>
-		<div class="col-sm-2">
+		<div class="col-sm-1">
 		</div>
 	</div>
 </div>

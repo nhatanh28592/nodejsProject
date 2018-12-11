@@ -7,14 +7,20 @@ var bodyParser = require('body-parser');
 const NodeCache = require( "node-cache" );
 var mongodb = require('mongodb');
 var passport = require("passport");   
-var LocalStrategy = require("passport-local");   
 var passportLocalMongoose = require("passport-local-mongoose");
 var multer  = require('multer');
 var cookieParser = require('cookie-parser');
 var mongoose = require("mongoose");
+mongoose.Promise = global.Promise;
+var LocalStrategy = require('passport-local'),
+    GoogleStrategy = require('passport-google-oauth2').Strategy,
+    FacebookStrategy = require('passport-facebook');
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var ip = require("ip");
 var port = process.env.PORT || 3000;
+var jsonInfoMultiFile = "";
+var mainFile = "";
  
 var MongoClient = mongodb.MongoClient;
 
@@ -27,19 +33,132 @@ var url = 'mongodb://nhatanh285:hna2851992@ds113835.mlab.com:13835/nhatanh_test'
 var numberPager = 20;
 
 var connection = new connectOnce({ 
-    retries: 60, 
-    reconnectWait: 1000
+  retries: 60, 
+  reconnectWait: 1000
 }, MongoClient.connect, url);
  
 // Login
 mongoose.connect(url);
-app.use(require("express-session")({
-    secret:"Rusty is the best og in the world",
-    resave: false,
-    saveUninitialized: false
-}));
+var User = require('./model/user');
+var login = require('./model/login');
+passport.serializeUser(function(user, done) {
+  console.log("serializing " + user.username);
+  done(null, user);
+});
+passport.deserializeUser(function(obj, done) {
+  console.log("deserializing " + obj);
+  done(null, obj);
+});
+
+//Login Google
+passport.use(new GoogleStrategy({
+    clientID: "888632730028-3h6ojuvoicub1uf9kds5ljqf72v1m52v.apps.googleusercontent.com",
+    clientSecret: "CNCxfFxcoFV766yfMVNlxSHv",
+    callbackURL: "http://localhost:3000/auth/google/callback",
+    passReqToCallback   : true
+  },
+  function(request, accessToken, refreshToken, profile, done) {
+    console.log("DA CHAY VO DAY NHA ID: " +profile.id );
+    User.findOrCreate({ google_id: profile.id.toString()}, {
+     google_id: profile.id.toString(),
+     user_name:profile.displayName.toString(), 
+     display_name: profile.name.toString(),
+     picture: profile.photos ? profile.photos[0].value : 'themes/img/user_default.jpg'
+    }, function (err, user) {
+      return done(err, user);
+    });
+  }
+));
+
+//Login facebook
+passport.use(new FacebookStrategy({
+    clientID: "1600240390119279",
+    clientSecret: "e45ef0c2e066b8fcd9c26aec04a8bfcb",
+    callbackURL: "http://localhost:3000/auth/facebook/callback"
+  },
+  function(accessToken, refreshToken, profile, done) {
+    console.log("DA CHAY VO DAY NHA ID: " + profile.id );
+    User.findOrCreate({ facebook_id: profile.id.toString()}, {
+     facebook_id: profile.id.toString(),
+     user_name: profile.displayName.toString()
+    }, function (err, user) {
+      return done(err, user);
+    });
+  }
+));
+
+passport.use('local-signin', new LocalStrategy(
+  {passReqToCallback : true}, //allows us to pass back the request to the callback
+  function(req, username, password, done) {
+    login.localAuth(username, password)
+    .then(function (user) {
+      if (user) {
+        console.log("LOGGED IN AS: " + user.username);
+        req.session.success = 'You are successfully logged in ' + user.username + '!';
+        done(null, user);
+      }
+      if (!user) {
+        console.log("COULD NOT LOG IN");
+        req.session.error = 'Could not log user in. Please try again.'; //inform user could not log them in
+        done(null, user);
+      }
+    })
+    .fail(function (err){
+      console.log(err.body);
+    });
+  }
+));
+passport.use('local-signup', new LocalStrategy(
+  {passReqToCallback : true}, //allows us to pass back the request to the callback
+  function(req, username, password, done) {
+    login.localReg(username, password)
+    .then(function (user) {
+      if (user) {
+        console.log("REGISTERED: " + user.username);
+        req.session.success = 'You are successfully registered and logged in ' + user.username + '!';
+        done(null, user);
+      }
+      if (!user) {
+        console.log("COULD NOT REGISTER");
+        req.session.error = 'That username is already in use, please try a different one.'; //inform user could not log them in
+        done(null, user);
+      }
+    })
+    .fail(function (err){
+      console.log(err.body);
+    });
+  }
+));
+// Simple route middleware to ensure user is authenticated.
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) { return next(); }
+  req.session.error = 'Please sign in!';
+  res.redirect('/signin');
+}
+
+var logger = require('morgan');
+app.use(logger());
+app.use(cookieParser());
+var methodOverride =  require('method-override');
+app.use(methodOverride());
+var session = require('express-session');
+app.use(session({ secret: 'supernova' }));
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Session-persisted message middleware
+app.use(function(req, res, next){
+  var err = req.session.error,
+      msg = req.session.notice,
+      success = req.session.success;
+  delete req.session.error;
+  delete req.session.success;
+  delete req.session.notice;
+  if (err) res.locals.error = err;
+  if (msg) res.locals.notice = msg;
+  if (success) res.locals.success = success;
+  next();
+});
 
 // Send mail
 var transporter = nodemailer.createTransport({
@@ -51,21 +170,44 @@ var transporter = nodemailer.createTransport({
 });
 
 //IO
+var users = {};
 io.on('connection', function(socket){
 	console.log("socket: " + socket);
-  socket.on('chat message', function(msg){
+  socket.on('login', function(user){
+    console.log("IP: " + ip.address());
+    var userObj = JSON.parse(user);
+    var values = Object.values(users);
+    console.log("MSG USER:" + userObj.user_info);
+    if (!values.includes(userObj.user_info)) {
+      users[socket.id] = userObj.user_info;
+    }
+    console.log(values);
+  });
+  socket.on('message', function(msg){
   	console.log("MSG:" + msg);
+    var msgObj = JSON.parse(msg);
+    connection.when('available', function (err, db) {
+      autoIncrement.getNextSequence(db, 'message', function (err, autoIndex) {
+        var collection = db.collection('message');
+        collection.insert({
+          _id: autoIndex,
+          key: msgObj.key,
+          message: msgObj.message,
+          time: msgObj.time,
+        });
+      });
+    });
     io.emit('chat message', msg);
+  });
+  socket.on('disconnect_user', function(){
+    console.log("DISCONNECT USER");
+    users[socket.id] = '';
   });
 });
 
 http.listen(port, function(){
   console.log('listening on *:' + port);
 });
-
-//app.use(expressValidator);
-var jsonInfoMultiFile = "";
-var mainFile = "";
 
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
@@ -77,20 +219,13 @@ const myCache = new NodeCache();;
 app.use(cookieParser());
 // set a cookie
 app.use(function (req, res, next) {
-  // check if client sent cookie
   var cookie = req.cookies.cookieName;
-  if (cookie === undefined)
-  {
-    // no: set a new cookie
+  if (cookie === undefined) {
     var randomNumber=Math.random().toString();
     randomNumber=randomNumber.substring(2,randomNumber.length);
     res.cookie('cookieName',randomNumber, { maxAge: 900000, httpOnly: true });
-  } 
-  else
-  {
-    // yes, cookie was already present 
-  } 
-  next(); // <-- important!
+  }
+  next();
 });
 
 var storage = multer.diskStorage({
@@ -130,176 +265,160 @@ app.get("/", function(req, res){
 	}
 	// Get the documents collection
 	connection.when('available', function (err, db) {
-
-    // Do stuff
-        var collection = db.collection('product');
- 		var collectionType = db.collection('type_main');
-        // Find some state
-
-        collection.find({"info_product.name_utf":new RegExp(utf8(search), "i")}).toArray
-        (
-            function (err, result) {
-                if (err) {
-                    console.log(err);
-                } else if (result.length) {
-                    //var result=result.length;
-                    var total;
-                	var cookie = req.cookies.cookieName;
-                	if (cookie == undefined) {
-                		total = 0;
-                	} else {
-                		var productData = myCache.get(cookie);
-	            		if (productData == undefined)
-	            			total = 0;
-	            		else
-	            			total = productData.length;
-                	}
-                	// Data link left
- 
-			 		collectionType.aggregate([{
-					    	$lookup: {
-						        from: "type",
-						        localField: "_id",
-						        foreignField: "type_main",
-						        as: "type_info"
-					    	}
-						}]).toArray(
-			 
-			            function (err, res_type) {
-			                if (err) {
-			                    console.log(err);
-			                } else if (res_type.length) {
-			                	var prevPager = page - 1;
-			                	var nextPager = page + 1;
-
-        	 					res.render("index", {products: result.slice(numberPager*page, numberPager*page + numberPager) , 
-        	 						total_product: total, types: res_type, 
-        	 						count: (result.length/numberPager),
-        	 						prevPager: prevPager,
-        	 						nextPager: nextPager,
-        	 						page: page,
-        	 						list: false
-        	 					});
-
-			                } else {
-			                    console.log('No document(s) found with defined "find" criteria!');
-			                    res.send("Error");
-			                }
-			            }
-			 
-			        );
-                } else {
-                    console.log('No document(s) found with defined "find" criteria!');
-                    res.send("Error");
-                }
+    var collection = db.collection('product');
+    var collectionType = db.collection('type_main');
+    collection.find({"info_product.name_utf":new RegExp(utf8(search), "i")}).toArray
+    (
+      function (err, result) {
+        if (err) {
+            console.log(err);
+        } else if (result.length) {
+          var total;
+        	var cookie = req.cookies.cookieName;
+        	if (cookie == undefined) {
+        		total = 0;
+        	} else {
+        		var productData = myCache.get(cookie);
+        		if (productData == undefined) {
+        			total = 0;
+            } else{
+        			total = productData.length;
             }
- 
-        );
+        	}
+    	 		collectionType.aggregate([{
+			    	$lookup: {
+			        from: "type",
+			        localField: "_id",
+			        foreignField: "type_main",
+			        as: "type_info"
+			    	}
+    			}]).toArray(
+            function (err, res_type) {
+              if (err) {
+                console.log(err);
+              } else if (res_type.length) {
+              	var prevPager = page - 1;
+              	var nextPager = page + 1;
+    	 					res.render("index", {products: result.slice(numberPager*page, numberPager*page + numberPager) , 
+    	 						total_product: total, types: res_type, 
+    	 						count: (result.length/numberPager),
+    	 						prevPager: prevPager,
+    	 						nextPager: nextPager,
+    	 						page: page,
+    	 						list: false, 
+    	 						user: req.user
+    	 					});
+              } else {
+                console.log('No document(s) found with defined "find" criteria!');
+                res.send("Error");
+              }
+            }
+          );
+        } else {
+          console.log('No document(s) found with defined "find" criteria!');
+          res.send("Error");
+        }
+      }
+    );
 	});
 });
 
 app.get("/product_list", function(req, res){
 	var pageStr = req.query.page;
-	console.log("Page: " + page);
 	var page = 0;
 	if (pageStr != undefined) {
 		page = parseInt(pageStr);
 	}
 	var type_main = req.query.type_main;
 	var type = req.query.type;
-	// Get the documents collection
 	connection.when('available', function (err, db) {
-        var collection = db.collection('product');
+    var collection = db.collection('product');
  		var collectionType = db.collection('type_main');
-        // Find some state
-        collection.find({ "type" : {
-	        "type_main" : type_main,
-	        "type" : type
-	    }}).toArray(
- 
-            function (err, result) {
-                if (err) {
-                    console.log(err);
-                } else if (result.length) {
-                    //var result=result.length;
-                    var total;
-                	var cookie = req.cookies.cookieName;
-                	console.log("cookie da co la: " + cookie)
-                	if (cookie == undefined) {
-                		total = 0;
-                	} else {
-                		var productData = myCache.get(cookie);
-	            		if (productData == undefined)
-	            			total = 0;
-	            		else
-	            			total = productData.length;
-                	}
- 
+    collection.find({ "type" : {
+      "type_main" : type_main,
+      "type" : type
+    }}).toArray(
+      function (err, result) {
+        if (err) {
+          console.log(err);
+        } else if (result.length) {
+          var total;
+        	var cookie = req.cookies.cookieName;
+        	console.log("cookie da co la: " + cookie)
+        	if (cookie == undefined) {
+        		total = 0;
+        	} else {
+        		var productData = myCache.get(cookie);
+      		if (productData == undefined)
+      			total = 0;
+      		else
+      			total = productData.length;
+        	}
 			 		collectionType.aggregate([{
-					    	$lookup: {
-						        from: "type",
-						        localField: "_id",
-						        foreignField: "type_main",
-						        as: "type_info"
-					    	}
-						}]).toArray(
-			 
-			            function (err, res_type) {
-			                if (err) {
-			                    console.log(err);
-			                } else if (res_type.length) {
-			                	var prevPager = page - 1;
-			                	var nextPager = page + 1;
-			                    console.log("DATA: " +  JSON.stringify(res_type));
-        	 					res.render("index", {products: result.slice(numberPager*page, numberPager*page + numberPager) , 
-        	 						total_product: total, types: res_type, 
-        	 						count: (result.length/numberPager),
-        	 						prevPager: prevPager,
-        	 						nextPager: nextPager,
-        	 						page: page,
-        	 						list: true,
-        	 						type_main: type_main,
-        	 						type: type
-        	 					});
-
-			                } else {
-			                    console.log('No document(s) found with defined "find" criteria!');
-			                    res.send("Error");
-			                }
-			            }
-			 
-			        );
-                } else {
-                    console.log('No document(s) found with defined "find" criteria!');
-                    res.send("Error");
-                }
+			    	$lookup: {
+				        from: "type",
+				        localField: "_id",
+				        foreignField: "type_main",
+				        as: "type_info"
+			    	}
+					}]).toArray(
+            function (err, res_type) {
+              if (err) {
+                  console.log(err);
+              } else if (res_type.length) {
+              	var prevPager = page - 1;
+              	var nextPager = page + 1;
+    	 					res.render("index", {products: result.slice(numberPager*page, numberPager*page + numberPager) , 
+    	 						total_product: total, types: res_type, 
+    	 						count: (result.length/numberPager),
+    	 						prevPager: prevPager,
+    	 						nextPager: nextPager,
+    	 						page: page,
+    	 						list: true,
+    	 						type_main: type_main,
+    	 						type: type, 
+                  user: req.user
+    	 					});
+              } else {
+                console.log('No document(s) found with defined "find" criteria!');
+                res.send("Error");
+              }
             }
- 
-        );
-    });
+		      );
+        } else {
+          console.log('No document(s) found with defined "find" criteria!');
+          res.send("Error");
+        }
+      }
+    );
+  });
 });
 
 app.get("/add_product", function(req, res){
 	connection.when('available', function (err, db) {
-    	// Get the documents collection
-        var collection = db.collection('type');
-        // Find some state
-        collection.find().toArray
-        (
- 
-            function (err, result) {
-                if (err) {
-                    console.log(err);
-                } else if (result.length) {
- 					res.render("add_product", {types: result , total_product: 0, value: result.length});
-                } else {
-                    console.log('No document(s) found with defined "find" criteria!');
-                    res.render("add_product", {types: result , total_product: 0, value: result.length});
-                }
-            }
- 
-        );
-    });
+    var collection = db.collection('type');
+    collection.find().toArray(
+      function (err, result) {
+        if (err) {
+            console.log(err);
+        } else if (result.length) {
+ 					res.render("add_product", {
+            types: result , 
+            total_product: 0, 
+            value: result.length
+          });
+        } else {
+          console.log('No document(s) found with defined "find" criteria!');
+          res.render("add_product", {
+            types: result, 
+            total_product: 0, 
+            value: result.length, 
+            user: req.user
+          });
+        }
+      }
+    );
+  });
 });
 
 app.get('/io_chat', function(req, res){
@@ -312,84 +431,81 @@ app.post("/saveData", function(req, res){
 			res.send("Error");
 		} else {
 			connection.when('available', function (err, db) {
-			    autoIncrement.getNextSequence(db, 'product', function (err, autoIndex) {
-			        var collection = db.collection('product');
-			        var color = [];
-			        if( Object.prototype.toString.call( req.body.color ) === '[object Array]' ) {
-					    color = req.body.color;
-					} else {
-						color.push(req.body.color);
-					}
-			        collection.insert({
-			            _id: autoIndex,
-			            type:{
-			            	type_main : req.body.type_main,
-			            	type : req.body.type
-			            },
-			            info_product: {
-			            	name : req.body.name,
-			            	name_utf: utf8(req.body.name),
-			            	price : req.body.price, 
-			            	description: req.body.description, 
-			            	main_file: mainFile,
-			            	color: color
-			            },
-			            file: JSON.parse("[" + jsonInfoMultiFile.substring(0, jsonInfoMultiFile.length -1) + "]")
-			        });
-			        jsonInfoMultiFile = "";
-			        mainFile = "";
-			    });
+		    autoIncrement.getNextSequence(db, 'product', function (err, autoIndex) {
+          var collection = db.collection('product');
+          var color = [];
+          if( Object.prototype.toString.call( req.body.color ) === '[object Array]' ) {
+		        color = req.body.color;
+				  } else {
+					 color.push(req.body.color);
+				  }
+	        collection.insert({
+            _id: autoIndex,
+            type:{
+            	type_main : req.body.type_main,
+            	type : req.body.type
+            },
+            info_product: {
+            	name : req.body.name,
+            	name_utf: utf8(req.body.name),
+            	price : req.body.price, 
+            	description: req.body.description, 
+            	main_file: mainFile,
+            	color: color
+            },
+            file: JSON.parse("[" + jsonInfoMultiFile.substring(0, jsonInfoMultiFile.length -1) + "]")
+	        });
+	        jsonInfoMultiFile = "";
+	        mainFile = "";
+		    });
 			});
 			res.send("Save success!");
 		}
 	});
 });
 
-
 app.post("/save_location_info", function(req, res){
 	console.log("save map");
 	connection.when('available', function (err, db) {
 		var collection = db.collection('map');
 		collection.find({ "type" : req.body.type}).toArray(
-            function (err, result) {
-                if (err) {
-                    console.log(err);
-                    res.send({info:"Error"});
-                } else if (result.length) {
-                	var mapInfoArr = result[0].location
-                	for (var i = 0; i < req.body.location.length; i++) {
-                		var mapInfo = req.body.location[i];
-                		if (mapInfoArr.filter(e => e.lat == mapInfo.lat && e.lng == mapInfo.lng).length == 0) {
-                			mapInfoArr.push(mapInfo);
-                		} else {
-                			console.log("duplicate");
-                		}
-                	}
-
-                	collection.update(
-					   { _id: result[0]._id },
-					   { $set:
-					      {
-					      	total : mapInfoArr.length,
-					        location : mapInfoArr
-					      }
-					   }
-					)
-                    res.send({info:"Update success"});
-                } else {
-                    autoIncrement.getNextSequence(db, 'map', function (err, autoIndex) {
-				        collection.insert({
-				            _id: autoIndex,
-				            type: req.body.type,
-				            total: req.body.location.length,
-				            location : req.body.location
-				        });
-				        res.send({info: "Insert success"});
-				    });
-                }
-            }
- 
-        );
+      function (err, result) {
+        if (err) {
+            console.log(err);
+            res.send({info:"Error"});
+        } else if (result.length) {
+        	var mapInfoArr = result[0].location
+        	for (var i = 0; i < req.body.location.length; i++) {
+        		var mapInfo = req.body.location[i];
+        		if (mapInfoArr.filter(e => e.lat == mapInfo.lat && e.lng == mapInfo.lng).length == 0) {
+        			mapInfoArr.push(mapInfo);
+        		} else {
+        			console.log("duplicate");
+        		}
+        	}
+          collection.update(
+		        { _id: result[0]._id },
+		        { $set:
+    		      {
+    		      	total : mapInfoArr.length,
+    		        location : mapInfoArr
+    		      }
+		        }
+		      )
+          res.send({info:"Update success"});
+        } else {
+          autoIncrement.getNextSequence(db, 'map', function (err, autoIndex) {
+          collection.insert({
+            _id: autoIndex,
+            type: req.body.type,
+            total: req.body.location.length,
+            location : req.body.location
+	        });
+	        res.send({info: "Insert success"});
+	        });
+        }
+      }
+    );
 	});
 });
 
@@ -398,135 +514,131 @@ app.get("/product_details", function(req, res){
 	console.log("Page: " + page);
 	var page = 0;
 	var resultData;
+  var users;
 	connection.when('available', function (err, db) {
 	    if (err) {
 	        console.log('Unable to connect to the mongoDB server. Error:', err);
-	    } 
-	    else 
-	    {
-   		    console.log('Connection established to', url);
-	    	console.log('Connection correct user', url);
-	    	// Get the documents collection
-	        var collection = db.collection('product');
-	        var collectionType = db.collection('type_main');
-	 
-	 		collection.find({ "type" : {
+	    } else {
+        var collection = db.collection('product');
+        var collectionType = db.collection('type_main');
+        var collectionUsers = db.collection('users');
+	 		  collection.find({ 
+          "type" : {
 		        "type_main" : req.query.type_main,
 		        "type" : req.query.type
-		    }}).toArray
-	        (
-	 
-	            function (err, result) {
-	                if (err) {
-	                    console.log(err);
-	                } else if (result.length) {
-	                    console.log(result);
-	                    //var result=result.length;
-	                    var total;
-                    	var cookie = req.cookies.cookieName;
-                    	console.log("cookie da co la: " + cookie)
-                    	if (cookie == undefined) {
-                    		total = 0;
-                    	} else {
-                    		var productData = myCache.get(cookie);
-		            		if (productData == undefined)
-		            			total = 0;
-		            		else
-		            			total = productData.length;
-                    	}
-	 					resultData = result;
-	                } else {
-	                    console.log('No document(s) found with defined "find" criteria!');
-	                    res.send("ERROR");
-	                }
-	                //Close connection
-	            }
-	 
-	        );
-
-	        // Find some state
-	        collection.findOne({'_id': parseInt(req.query.productId)}, function(err, document) {
-			  	console.log("data: " + document._id);
-			  	var total;
+		      }
+        }).toArray(
+          function (err, result) {
+            if (err) {
+                console.log(err);
+            } else if (result.length) {
+              console.log(result);
+              var total;
             	var cookie = req.cookies.cookieName;
+            	console.log("cookie da co la: " + cookie)
             	if (cookie == undefined) {
             		total = 0;
             	} else {
             		var productData = myCache.get(cookie);
-            		if (productData == undefined)
+            		if (productData == undefined) {
             			total = 0;
-            		else
-            			total = productData.length;
+                } else {
+                  total = productData.length;
+                }
             	}
-            	collectionType.aggregate([{
-				    	$lookup: {
-					        from: "type",
-					        localField: "_id",
-					        foreignField: "type_main",
-					        as: "type_info"
-				    	}
-					}]).toArray(
-		 
-		            function (err, res_type) {
-		                if (err) {
-		                    console.log(err);
-		                } else if (res_type.length) {
-		                	var prevPager = page - 1;
-		                	var nextPager = page + 1;
-    	 					res.render("product_details", {product: document, products: resultData.slice(numberPager*page, numberPager*page + numberPager) , total_product: total, types: res_type,
-    	 					count: (resultData.length/numberPager),
-            	 						prevPager: prevPager,
-            	 						nextPager: nextPager,
-            	 						page: page,
-            	 					    type_main: req.query.type_main,
-            	 					    type: req.query.type,
-            	 					    productId: req.query.productId});
-
-		                } else {
-		                    console.log('No document(s) found with defined "find" criteria!');
-		                    res.send("ERROR");
-		                }
-		                //Close connection
-		            }
-		 
-		        );
-	         
-			});
-
-
+				      resultData = result;
+            } else {
+              console.log('No document(s) found with defined "find" criteria!');
+              res.send("ERROR");
+            }
+          }
+	      );
+        collectionUsers.find({ 
+        }).toArray(
+          function (err, result) {
+            if (err) {
+                console.log(err);
+            } else if (result.length) {
+              users = result;
+            } else {
+              console.log('No document(s) found with defined "find" criteria!');
+              res.send("ERROR");
+            }
+          }
+        );
+	      collection.findOne({'_id': parseInt(req.query.productId)}, function(err, document) {
+			  	console.log("data: " + document._id);
+			  	var total;
+        	var cookie = req.cookies.cookieName;
+        	if (cookie == undefined) {
+        		total = 0;
+        	} else {
+        		var productData = myCache.get(cookie);
+        		if (productData == undefined)
+        			total = 0;
+        		else
+        			total = productData.length;
+        	}
+        	collectionType.aggregate([{
+		    	$lookup: {
+		        from: "type",
+		        localField: "_id",
+		        foreignField: "type_main",
+		        as: "type_info"
+		    	}}]).toArray(
+            function (err, res_type) {
+              if (err) {
+                  console.log(err);
+              } else if (res_type.length) {
+              	var prevPager = page - 1;
+              	var nextPager = page + 1;
+ 					      res.render("product_details", {
+                  product: document, 
+                  products: resultData.slice(numberPager*page, numberPager*page + numberPager), 
+                  total_product: total, types: res_type,
+	 					      count: (resultData.length/numberPager),
+    	 						prevPager: prevPager,
+    	 						nextPager: nextPager,
+    	 						page: page,
+    	 					  type_main: req.query.type_main,
+    	 					  type: req.query.type,
+    	 					  productId: req.query.productId,
+                  user: req.user,
+                  list_user: users
+                });
+              } else {
+                console.log('No document(s) found with defined "find" criteria!');
+                res.send("ERROR");
+              }
+            }
+		      );
+			  });
 	    }
 	});
 });
 
 app.post("/product_details", function(req, res){
 	connection.when('available', function (err, db) {
-	    if (err) {
-	        console.log('Unable to connect to the mongoDB server. Error:', err);
-	    } 
-	    else 
-	    {
-   		    console.log('Connection established to', url);
-	    	console.log('Connection correct user', url);
-	    	// Get the documents collection
-	        var collection = db.collection('product');
-	 
-	        // Find some state
-	        collection.findOne({'_id': parseInt(req.body.product_id)}, function(err, document) {
-			  	console.log("data: " + document._id);
-			  	var total;
-            	var cookie = req.cookies.cookieName;
-            	if (cookie == undefined) {
-            		total = 0;
-            	} else {
-            		var productData = myCache.get(cookie);
-            		if (productData == undefined)
-            			total = 0;
-            		else
-            			total = productData.length;
-            	}
-	          res.send({product: document});
-			});
-	    }
+    if (err) {
+        console.log('Unable to connect to the mongoDB server. Error:', err);
+    } else {
+      var collection = db.collection('product');
+      collection.findOne({'_id': parseInt(req.body.product_id)}, function(err, document) {
+	  	  var total;
+      	var cookie = req.cookies.cookieName;
+      	if (cookie == undefined) {
+      		total = 0;
+      	} else {
+      		var productData = myCache.get(cookie);
+      		if (productData == undefined) {
+      			total = 0;
+          } else {
+      			total = productData.length;
+          }
+      	}
+        res.send({product: document});
+		  });
+	  }
 	});
 });
 
@@ -543,7 +655,7 @@ app.post('/add_product_to_cart',multer().array(), function (req, res) {
 		    console.log("SIZE: " + myCache.get(cookie).length) 
 		  }
 		});
-	    res.send({product_total: myCache.get(cookie).length});
+    res.send({product_total: myCache.get(cookie).length});
 	} else {
 		productData.push(req.body);
 		myCache.set( cookie, productData, function( err, success ){
@@ -552,21 +664,21 @@ app.post('/add_product_to_cart',multer().array(), function (req, res) {
 		    console.log("SIZE: " + myCache.get(cookie).length) 
 		  }
 		});
-	    res.send({product_total: myCache.get(cookie).length});
+    res.send({product_total: myCache.get(cookie).length});
 	}
 });
 
 app.post('/add_type',multer().array(), function (req, res) {
 	connection.when('available', function (err, db) {
-	    autoIncrement.getNextSequence(db, 'type', function (err, autoIndex) {
-	        var collection = db.collection('type');
-	        collection.insert({
-	            _id: autoIndex,
-	            type_main: req.body.type_main,
-	            name: req.body.name
-	    	});
-	    	res.send({info: "save success"});
-    	});
+    autoIncrement.getNextSequence(db, 'type', function (err, autoIndex) {
+      var collection = db.collection('type');
+      collection.insert({
+        _id: autoIndex,
+        type_main: req.body.type_main,
+        name: req.body.name
+  	  });
+  	  res.send({info: "save success"});
+  	});
 	});
 });
 
@@ -581,68 +693,63 @@ app.post("/buy_now", function(req, res){
 		var productDetail;
 		var totalPrice = 0;
 		if (productData != undefined) {
+      var total;
 			for (var i = 0; i < productData.length; i++) {
-		    	productDetail = productData[i].product_info;
-
-		    	for (var j = 0; j < productDetail.length; j++) {
-		    		totalPrice += parseInt(productDetail[j].price)*parseInt(productDetail[j].number);
-		    	}
-
-		    	var jsonData;
-			  	jsonData = {
-		            		product_info: productDetail
-			  				};
-			  	productBuyList.push(jsonData);
-		    }
-		    var total;
+	    	productDetail = productData[i].product_info;
+	    	for (var j = 0; j < productDetail.length; j++) {
+	    		totalPrice += parseInt(productDetail[j].price)*parseInt(productDetail[j].number);
+	    	}
+	    	var jsonData;
+		  	jsonData = {product_info: productDetail};
+		  	productBuyList.push(jsonData);
+	    }
 			if (cookie == undefined) {
 				total = 0;
 			} else {
-				if (productData == undefined)
+				if (productData == undefined) {
 					total = 0;
-				else
+        }
+				else {
 					total = productData.length;
+        }
 			}
-
 			connection.when('available', function (err, db) {
-			    if (err) {
-			        console.log('Unable to connect to the mongoDB server. Error:', err);
-			    } 
-			    else 
-			    {
-			    	// Get the documents collection
-			        var collection = db.collection('type_main');	 
-			 		collection.aggregate([{
-					    	$lookup: {
-						        from: "type",
-						        localField: "_id",
-						        foreignField: "type_main",
-						        as: "type_info"
-					    	}
-						}]).toArray(
-			 
-			            function (err, result) {
-			                if (err) {
-			                    console.log(err);
-			                } else if (result.length) {
-			                    console.log("DATA: " +  JSON.stringify(result));
-			                    res.render("product_buy", {products: productBuyList, total_product: total, total_price: totalPrice.toLocaleString(), types: result});
-			                } else {
-			                    console.log('No document(s) found with defined "find" criteria!');
-			                    res.send("ERROR");
-			                }
-			                //Close connection
-			            }
-			 
-			        );
-			    }
-
+		    if (err) {
+	        console.log('Unable to connect to the mongoDB server. Error:', err);
+		    } else {
+	        var collection = db.collection('type_main');	 
+		 		  collection.aggregate([{
+			    	$lookup: {
+			        from: "type",
+			        localField: "_id",
+			        foreignField: "type_main",
+			        as: "type_info"
+			    	}
+					}]).toArray(
+            function (err, result) {
+              if (err) {
+                  console.log(err);
+              } else if (result.length) {
+                console.log("DATA: " +  JSON.stringify(result));
+                res.render("product_buy", {
+                  products: productBuyList, 
+                  total_product: total, 
+                  total_price: totalPrice.toLocaleString(), 
+                  types: result,
+                  user: req.user
+                });
+              } else {
+                console.log('No document(s) found with defined "find" criteria!');
+                res.send("ERROR");
+              }
+            }
+		      );
+		    }
 			});
 		} else {
 			res.send("ERROR please go home page");
 		}
-	}
-    
+	}   
 });
 
 app.get("/buy_now", function(req, res){
@@ -656,67 +763,63 @@ app.get("/buy_now", function(req, res){
 		var productDetail;
 		var totalPrice = 0;
 		if (productData != undefined) {
+      var total;
 			for (var i = 0; i < productData.length; i++) {
-		    	productDetail = productData[i].product_info;
-
-		    	for (var j = 0; j < productDetail.length; j++) {
-		    		totalPrice += parseInt(productDetail[j].price)*parseInt(productDetail[j].number);
-		    	}
-
-		    	var jsonData;
-				  	jsonData = {
-			            		product_info: productDetail
-				  				};
-			  	productBuyList.push(jsonData);
-		    }
-		    var total;
+	    	productDetail = productData[i].product_info;
+	    	for (var j = 0; j < productDetail.length; j++) {
+	    		totalPrice += parseInt(productDetail[j].price)*parseInt(productDetail[j].number);
+	    	}
+	    	var jsonData;
+			  	jsonData = {
+        		product_info: productDetail
+  				};
+		  	productBuyList.push(jsonData);
+	    }
 			if (cookie == undefined) {
 				total = 0;
 			} else {
-				if (productData == undefined)
+				if (productData == undefined) {
 					total = 0;
-				else
+        } else{
 					total = productData.length;
+        }
 			}
-
 			connection.when('available', function (err, db) {
-			    if (err) {
-			        console.log('Unable to connect to the mongoDB server. Error:', err);
-			    } 
-			    else 
-			    {
-			    	// Get the documents collection
-			        var collection = db.collection('type_main');	 
+		    if (err) {
+	        console.log('Unable to connect to the mongoDB server. Error:', err);
+		    } else {
+	        var collection = db.collection('type_main');	 
 			 		collection.aggregate([{
-					    	$lookup: {
-						        from: "type",
-						        localField: "_id",
-						        foreignField: "type_main",
-						        as: "type_info"
-					    	}
-						}]).toArray(
-			 
-			            function (err, result) {
-			                if (err) {
-			                    console.log(err);
-			                } else if (result.length) {
-			                    res.render("product_buy", {products: productBuyList, total_product: total, total_price: totalPrice.toLocaleString(), types: result});
-			                } else {
-			                    console.log('No document(s) found with defined "find" criteria!');
-			                    res.send("ERROR");
-			                }
-			                //Close connection
-			            }
-			 
-			        );
-			    }
-
+			    	$lookup: {
+			        from: "type",
+			        localField: "_id",
+			        foreignField: "type_main",
+			        as: "type_info"
+			    	}
+					}]).toArray(
+            function (err, result) {
+              if (err) {
+                  console.log(err);
+              } else if (result.length) {
+                res.render("product_buy", {
+                  products: productBuyList, 
+                  total_product: total, 
+                  total_price: totalPrice.toLocaleString(), 
+                  types: result,
+                  user: req.user
+                });
+              } else {
+                console.log('No document(s) found with defined "find" criteria!');
+                res.send("ERROR");
+              }
+            }
+		      );
+		    }
 			});
 		} else {
 			res.send("ERROR please go home page");
 		}
-	}
-    
+	} 
 });
 
 app.post("/buy_now_next_step", function(req, res){
@@ -728,48 +831,48 @@ app.post("/buy_now_next_step", function(req, res){
 	var productDetail;
 	var totalPrice = 0;
 	connection.when('available', function (err, db) {
-	    autoIncrement.getNextSequence(db, 'product_booking', function (err, autoIndex) {
-	        var collection = db.collection('product_booking');
-	        collection.insert({
-	            _id: autoIndex,
-	            info_personal: req.body,
-	            info_booking:productData
-	        });
-	        jsonInfoMultiFile = "";
-	        mainFile = "";
-	        var infoProductHtml = '';
-			for (var i = 0; i < productData.length; i++) {
-				infoProductHtml += '<div style="margin: auto;width: 60%;border: 2px solid red;padding: 10px;border-radius:5px">' +
-							      	'<div  style="position:relative;">' + 
-									    '<div><img src="' + fullUrl + '/upload/' + productData[i].product_info[0].main_file +'" alt="Logo" title="Logo" style="display:block;border: 1px solid;border-radius: 5px;" width="120" height="120" /></div>' + 
-									    '<div style="position:absolute;width:250px;right:0;top:0;">'+
-									    	'<p><b>Name: </b>' + productData[i].product_info[0].name + '</p>' +
-									    	'<p><b>Số lượng: </b>' + productData[i].product_info[0].number + '</p>' +
-									    	'<p><b>Màu sắc: </b>' + '<input type="color" value="' + productData[i].product_info[0].color +'" class="form-control" name="color" calss="color">' + '</p>' +
-									    	'<p><b>Giá: </b><span style="color:red"><b>'+  productData[i].product_info[0].price +'</b></span></p>' +
-									    '</div>' + 
-									'</div>' + 
-							      	'<a href="'+ fullUrl +'/product_booking_detail?id=' + autoIndex + '"><button style="font-size: 20px;color: red;">XEM CHI TIẾT ĐƠN HÀNG</button></a>' +
-							      	'</div> <br>';
-			}
+    autoIncrement.getNextSequence(db, 'product_booking', function (err, autoIndex) {
+      var collection = db.collection('product_booking');
+      collection.insert({
+        _id: autoIndex,
+        info_personal: req.body,
+        info_booking:productData
+      });
+      jsonInfoMultiFile = "";
+      mainFile = "";
+      var infoProductHtml = '';
+	    for (var i = 0; i < productData.length; i++) {
+			  infoProductHtml += '<div style="margin: auto;width: 60%;border: 2px solid red;padding: 10px;border-radius:5px">' +
+        							      	'<div  style="position:relative;">' + 
+          									    '<div><img src="' + fullUrl + '/upload/' + productData[i].product_info[0].main_file +'" alt="Logo" title="Logo" style="display:block;border: 1px solid;border-radius: 5px;" width="120" height="120" /></div>' + 
+          									    '<div style="position:absolute;width:250px;right:0;top:0;">'+
+          									    	'<p><b>Name: </b>' + productData[i].product_info[0].name + '</p>' +
+          									    	'<p><b>Số lượng: </b>' + productData[i].product_info[0].number + '</p>' +
+          									    	'<p><b>Màu sắc: </b>' + '<input type="color" value="' + productData[i].product_info[0].color +'" class="form-control" name="color" calss="color">' + '</p>' +
+          									    	'<p><b>Giá: </b><span style="color:red"><b>'+  productData[i].product_info[0].price +'</b></span></p>' +
+          									    '</div>' + 
+        									    '</div>' + 
+        							      	'<a href="'+ fullUrl +'/product_booking_detail?id=' + autoIndex + '"><button style="font-size: 20px;color: red;">XEM CHI TIẾT ĐƠN HÀNG</button></a>' +
+      							      	'</div> <br>';
+	    }
 			console.log("HYML: " + infoProductHtml);
 			//Send mail 
 			var mailOptions = {
-					from: 'nhatanh2852@gmail.com',
-					to: mailSend,
-					subject: 'Thông báo đặt hàng thành công',
-					forceEmbeddedImages: true,
-					html: '<div style="margin: auto;width: 60%;border: 3px solid #73AD21;padding: 10px;border-radius: 10px;">' + 
-					      	'<h1 style="color:red; text-align:center">XÁC NHẬN ĐẶT HÀNG THÀNH CÔNG</h1>' +
-					      	'<p>Xin chào ! <span style="color:red">'+ req.body.name +'</span> chúng tôi đã nhận được đơn đặt hàng của bạn, cảm ơn vì đã đặt hàng của chúng tôi, chúng tôi sẽ liên hệ và giao hàng đến bạn một cách sớm nhất</p>' +
-					      	infoProductHtml +
-					      	'<div>' +
-					      		'<img src="' + fullUrl + '/themes/img/logo.png" alt="Logo" title="Logo" style="display:block;" /> <br> <b>ĐIỆN NƯỚC HOÀNG PHI</b>' +
-					      		'<br><br><p>ĐC : Mai Đăng Chơn, Hoà Quý, Ngũ Hành Sơn, TP Đà Nẵng</p>' +
-					      		'<p>SDT: 01667288158</p>' +
-					      	'</div>' +
-					      '</div>'
-				};
+				from: 'nhatanh2852@gmail.com',
+				to: mailSend,
+				subject: 'Thông báo đặt hàng thành công',
+				forceEmbeddedImages: true,
+				html: '<div style="margin: auto;width: 60%;border: 3px solid #73AD21;padding: 10px;border-radius: 10px;">' + 
+				      	'<h1 style="color:red; text-align:center">XÁC NHẬN ĐẶT HÀNG THÀNH CÔNG</h1>' +
+				      	'<p>Xin chào ! <span style="color:red">'+ req.body.name +'</span> chúng tôi đã nhận được đơn đặt hàng của bạn, cảm ơn vì đã đặt hàng của chúng tôi, chúng tôi sẽ liên hệ và giao hàng đến bạn một cách sớm nhất</p>' +
+				      	infoProductHtml +
+				      	'<div>' +
+				      		'<img src="' + fullUrl + '/themes/img/logo.png" alt="Logo" title="Logo" style="display:block;" /> <br> <b>ĐIỆN NƯỚC HOÀNG PHI</b>' +
+				      		'<br><br><p>ĐC : Mai Đăng Chơn, Hoà Quý, Ngũ Hành Sơn, TP Đà Nẵng</p>' +
+				      		'<p>SDT: 01667288158</p>' +
+				      	'</div>' +
+				      '</div>'
+			};
 			transporter.sendMail(mailOptions, function(error, info){
 				if (error) {
 					console.log(error);
@@ -777,68 +880,65 @@ app.post("/buy_now_next_step", function(req, res){
 					console.log('Email sent: ' + info.response);
 				}
 			});
-	    });
+    });
+  });
 
-	});
-
-
-    for (var i = 0; i < productData.length; i++) {
-    	productDetail = productData[i].product_info;
-
-    	for (var j = 0; j < productDetail.length; j++) {
-    		totalPrice += parseInt(productDetail[j].price)*parseInt(productDetail[j].number);
-    	}
-
-    	var jsonData;
-	  	jsonData = {
-            		product_info: productDetail
-	  				};
-	  	productBuyList.push(jsonData);
-    }
-    var total;
+  for (var i = 0; i < productData.length; i++) {
+  	productDetail = productData[i].product_info;
+  	for (var j = 0; j < productDetail.length; j++) {
+  		totalPrice += parseInt(productDetail[j].price)*parseInt(productDetail[j].number);
+  	}
+  	var jsonData;
+  	jsonData = {product_info: productDetail};
+  	productBuyList.push(jsonData);
+  }
+  var total;
 	if (cookie == undefined) {
 		total = 0;
 	} else {
-		if (productData == undefined)
+		if (productData == undefined) {
 			total = 0;
-		else
+    } else {
 			total = productData.length;
+    }
 	}
 	connection.when('available', function (err, db) {
 		var collectionType = db.collection('type_main');
-			collectionType.aggregate([{
-		    	$lookup: {
-			        from: "type",
-			        localField: "_id",
-			        foreignField: "type_main",
-			        as: "type_info"
-		    	}
-			}]).toArray(
-	        function (err, result) {
-	            if (err) {
-	                console.log(err);
-	            } else if (result.length) {
-	                console.log("DATA: " +  JSON.stringify(result));
-	               
-	                res.render("product_buy_next", {products: productBuyList, total_product: 0, total_price: totalPrice.toLocaleString(), types: result});
-	                productData.length =0;
-	            } else {
-	                console.log('No document(s) found with defined "find" criteria!');
-	                res.render("add_product");
-	            }
-	            //Close connection
-	        }
-
-	    );
+		collectionType.aggregate([{
+    	$lookup: {
+        from: "type",
+        localField: "_id",
+        foreignField: "type_main",
+        as: "type_info"
+    	}
+		}]).toArray(
+      function (err, result) {
+        if (err) {
+          console.log(err);
+        } else if (result.length) {
+          console.log("DATA: " +  JSON.stringify(result));
+          res.render("product_buy_next", {
+            products: productBuyList, 
+            total_product: 0, 
+            total_price: totalPrice.toLocaleString(), 
+            types: result,
+            user: req.user
+          });
+          productData.length =0;
+        } else {
+          console.log('No document(s) found with defined "find" criteria!');
+          res.render("add_product");
+        }
+      }
+    );
 	});
-
 });
 
 app.get("/product_booking_detail", function(req, res){
 	var cookie = req.cookies.cookieName;
 	var total = 0;
 	if(cookie != undefined) {
-   		 total = myCache.get(cookie).length;
+		total = myCache.get(cookie).length;
 	}
 	connection.when('available', function (err, db) {
 		var collectionType = db.collection('type_main');
@@ -850,38 +950,35 @@ app.get("/product_booking_detail", function(req, res){
 					totalPrice += parseInt(document.info_booking[i].product_info[j].price)*parseInt(document.info_booking[i].product_info[j].number);
 				}
 			}
-        	collectionType.aggregate([{
-			    	$lookup: {
-				        from: "type",
-				        localField: "_id",
-				        foreignField: "type_main",
-				        as: "type_info"
-			    	}
-				}]).toArray(
-	 
-	            function (err, res_type) {
-	                if (err) {
-	                    console.log(err);
-	                } else if (res_type.length) {
-	 					res.render("product_booking_detail", {product_booking: document, types: res_type, total_product: total, total_price :totalPrice.toLocaleString()});
-
-	                } else {
-	                    console.log('No document(s) found with defined "find" criteria!');
-	                    res.send("ERROR");
-	                }
-	                //Close connection
-	            }
-	 
-	        );
-         
+    	collectionType.aggregate([{
+	    	$lookup: {
+	        from: "type",
+	        localField: "_id",
+	        foreignField: "type_main",
+	        as: "type_info"
+	    	}
+			}]).toArray(
+        function (err, res_type) {
+          if (err) {
+            console.log(err);
+          } else if (res_type.length) {
+				    res.render("product_booking_detail", {
+              product_booking: document, 
+              types: res_type, total_product: total, 
+              total_price :totalPrice.toLocaleString(),
+              user: req.user
+            });
+          } else {
+            console.log('No document(s) found with defined "find" criteria!');
+            res.send("ERROR");
+          }
+        }
+	    );   
 		});
-			
 	});
 });
 
-//LOGIN 
-
-
+//MAP 
 app.get("/map", function(req, res){
 	res.render("map")
 });
@@ -890,11 +987,10 @@ app.get("/map_view", function(req, res){
 	connection.when('available', function (err, db) {
 		var collection = db.collection('map');
 		collection.find({},{ type:1, _id:0}).toArray(
-            function (err, result) {
-                res.render("map_view",{types:result});
-            }
- 
-        );
+      function (err, result) {
+        res.render("map_view",{types:result});
+      }
+    );
 	});
 });
 
@@ -911,15 +1007,15 @@ app.post("/near_by_search", function(req, res){
 	connection.when('available', function (err, db) {
 		var collection = db.collection('map');
 		collection.find({ "type" : req.body.type}).toArray(
-            function (err, result) {
-                res.send({
-                	map_info_arr: result[0].location.filter(e => e.lat >= latMin && e.lat <= latMax && e.lng >= lngMin && e.lng <= lngMax ), 
-                	lat: lat, 
-                	lng: lng, 
-                	radius: radius});
-            }
- 
-        );
+      function (err, result) {
+        res.send({
+        	map_info_arr: result[0].location.filter(e => e.lat >= latMin && e.lat <= latMax && e.lng >= lngMin && e.lng <= lngMax ), 
+        	lat: lat, 
+        	lng: lng, 
+        	radius: radius
+        });
+      }
+    );
 	});
 });
 
@@ -928,62 +1024,168 @@ app.post("/save_location_info", function(req, res){
 	connection.when('available', function (err, db) {
 		var collection = db.collection('map');
 		collection.find({ "type" : req.body.type}).toArray(
-            function (err, result) {
-                if (err) {
-                    console.log(err);
-                    res.send({info:"Error"});
-                } else if (result.length) {
-                	var mapInfoArr = result[0].location
-                	for (var i = 0; i < req.body.location.length; i++) {
-                		var mapInfo = req.body.location[i];
-                		if (mapInfoArr.filter(e => e.lat == mapInfo.lat && e.lng == mapInfo.lng).length == 0) {
-                			mapInfoArr.push(mapInfo);
-                		} else {
-                			console.log("duplicate");
-                		}
-                	}
-
-                	collection.update(
-					   { _id: result[0]._id },
-					   { $set:
-					      {
-					      	total : mapInfoArr.length,
-					        location : mapInfoArr
-					      }
-					   }
-					)
-                    res.send({info:"Update success"});
-                } else {
-                    autoIncrement.getNextSequence(db, 'map', function (err, autoIndex) {
-				        collection.insert({
-				            _id: autoIndex,
-				            type: req.body.type,
-				            total: req.body.location.length,
-				            location : req.body.location
-				        });
-				        res.send({info: "Insert success"});
-				    });
-                }
-            }
- 
-        );
+      function (err, result) {
+        if (err) {
+            console.log(err);
+            res.send({info:"Error"});
+        } else if (result.length) {
+        	var mapInfoArr = result[0].location
+        	for (var i = 0; i < req.body.location.length; i++) {
+        		var mapInfo = req.body.location[i];
+        		if (mapInfoArr.filter(e => e.lat == mapInfo.lat && e.lng == mapInfo.lng).length == 0) {
+        			mapInfoArr.push(mapInfo);
+        		} else {
+        			console.log("duplicate");
+        		}
+        	}
+        	collection.update(
+				   { _id: result[0]._id },
+				   { $set:
+				      {
+				      	total : mapInfoArr.length,
+				        location : mapInfoArr
+				      }
+				   }
+	        )
+          res.send({info:"Update success"});
+        } else {
+          autoIncrement.getNextSequence(db, 'map', function (err, autoIndex) {
+            collection.insert({
+	            _id: autoIndex,
+	            type: req.body.type,
+	            total: req.body.location.length,
+	            location : req.body.location
+            });
+            res.send({info: "Insert success"});
+          });
+        }
+      }
+    );
 	});
 });
 
+//LOGIN
+app.get('/login_page', function(req, res){
+  res.render('home', {user: req.user});
+});
+
+app.get('/signin', function(req, res){
+  res.render('signin', {user: req.user});
+});
+
+app.post('/local-reg', passport.authenticate('local-signup', {
+  successRedirect: '/',
+  failureRedirect: '/signin'
+  })
+);
+
+app.post('/login', passport.authenticate('local-signin', { 
+  successRedirect: '/',
+  failureRedirect: '/signin'
+  })
+);
+
+app.post('/check_singup',multer().array(), function (req, res) {
+  var userName = req.body.user_name;
+  var password = req.body.password;
+  connection.when('available', function (err, db) {
+    var collection = db.collection('users');
+    collection.find({"user_name":userName.toString()}).toArray(
+      function (err, result) {
+        console.log("length: " + password);
+        if(userName == "" || password == "" || password == undefined || userName == undefined) {
+          res.send({"status": "Vui lòng nhập đầy đủ thông tin user name password!"});
+        } else {
+          if(result.length) {
+            res.send({"status": "User đã tồn tại vui lòng đăng nhập!"});
+          } else {
+            res.send({"status": "ok"});
+          }
+        }
+      }
+    );
+  });
+});
+
+// Open chat box
+app.post('/open_chat',multer().array(), function (req, res) {
+  var key_1 = req.body.key_1;
+  var key_2 = req.body.key_2;
+  var key_12 = key_1 + "_" + key_2;
+  var key_21 = key_2 + "_" + key_1;
+  connection.when('available', function (err, db) {
+    var collection = db.collection('message');
+    collection.find({$or:[{"key":key_12}, {"key": key_21}]}).toArray(
+      function (err, result) {
+        res.send({"list_message": result});
+      }
+    );
+  });
+});
+
+// Show list chat
+app.post('/list_chat',multer().array(), function (req, res) {
+  var values = Object.values(users);
+  connection.when('available', function (err, db) {
+    var collection = db.collection('users');
+    collection.find({}).toArray(
+      function (err, result) {
+        res.send({
+          "list_user": result,
+          "list_user_on": values}
+        );
+      }
+    );
+  });
+});
+
+
+/* GOOGLE ROUTER */
+app.get('/auth/google', passport.authenticate('google', { 
+  scope: ['https://www.googleapis.com/auth/plus.login'] 
+}));
+
+app.get('/auth/google/callback', 
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  function(req, res) {
+    console.log("URL: " + req.url);
+    res.redirect('/');
+});
+
+/* FACEBOOK ROUTER */
+app.get('/auth/facebook',
+  passport.authenticate('facebook'));
+
+app.get('/auth/facebook/callback',
+  passport.authenticate('facebook', { failureRedirect: '/login' }),
+  function(req, res) {
+    console.log("URL: " + req.url);
+    res.redirect('/');
+});
+
+
+app.get('/logout', function(req, res){
+  var name = req.user.username;
+  console.log("LOGGIN OUT " + req.user.username)
+  req.logout();
+  res.redirect('/');
+  req.session.notice = "You have successfully been logged out " + name + "!";
+});
+
 function utf8(str) {
-    str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
-    str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
-    str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
-    str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
-    str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
-    str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
-    str = str.replace(/đ/g, "d");
-    str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
-    str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
-    str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
-    str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
-    str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
-    str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
-    str = str.replace(/Đ/g, "D");
-    return str;
+  str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+  str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+  str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+  str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+  str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+  str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+  str = str.replace(/đ/g, "d");
+  str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+  str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+  str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+  str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+  str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+  str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+  str = str.replace(/Đ/g, "D");
+  return str;
 }
