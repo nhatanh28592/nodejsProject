@@ -197,7 +197,7 @@ io.on('connection', function(socket){
         });
       });
     });
-    io.emit('chat message', msg);
+    io.emit('message', msg);
   });
   socket.on('disconnect_user', function(){
     console.log("DISCONNECT USER");
@@ -396,24 +396,23 @@ app.get("/product_list", function(req, res){
 
 app.get("/add_product", function(req, res){
 	connection.when('available', function (err, db) {
-    var collection = db.collection('type');
-    collection.find().toArray(
-      function (err, result) {
+    var collectionType = db.collection('type');
+    var collectionTypeMain = db.collection('type_main');
+    collectionTypeMain.find().toArray(
+      function (err, result_main) {
         if (err) {
             console.log(err);
-        } else if (result.length) {
- 					res.render("add_product", {
-            types: result , 
-            total_product: 0, 
-            value: result.length
-          });
         } else {
-          console.log('No document(s) found with defined "find" criteria!');
-          res.render("add_product", {
-            types: result, 
-            total_product: 0, 
-            value: result.length, 
-            user: req.user
+          console.log("ID: " + result_main[0]._id);
+          collectionType.find({"type_main":result_main[0]._id}).toArray(
+            function (err, result) {
+              res.render("add_product", {
+                types: result , 
+                type_mains: result_main , 
+                total_product: 0, 
+                value: result.length,
+                user: req.user
+              });
           });
         }
       }
@@ -425,41 +424,94 @@ app.get('/io_chat', function(req, res){
   res.render("iochat");
 });
 
-app.post("/saveData", function(req, res){
+app.post("/add_new_product", function(req, res){
 	uploadMultiFile(req, res, function(err){
 		if(err) {
 			res.send("Error");
 		} else {
+      console.log("Type_main: " + req.body.type_main);
 			connection.when('available', function (err, db) {
-		    autoIncrement.getNextSequence(db, 'product', function (err, autoIndex) {
-          var collection = db.collection('product');
-          var color = [];
-          if( Object.prototype.toString.call( req.body.color ) === '[object Array]' ) {
-		        color = req.body.color;
-				  } else {
-					 color.push(req.body.color);
-				  }
-	        collection.insert({
-            _id: autoIndex,
-            type:{
-            	type_main : req.body.type_main,
-            	type : req.body.type
-            },
-            info_product: {
-            	name : req.body.name,
-            	name_utf: utf8(req.body.name),
-            	price : req.body.price, 
-            	description: req.body.description, 
-            	main_file: mainFile,
-            	color: color
-            },
-            file: JSON.parse("[" + jsonInfoMultiFile.substring(0, jsonInfoMultiFile.length -1) + "]")
-	        });
-	        jsonInfoMultiFile = "";
-	        mainFile = "";
-		    });
+        var collection = db.collection('product');
+        var color = [];
+        if( Object.prototype.toString.call( req.body.color ) === '[object Array]' ) {
+          color = req.body.color;
+        } else {
+          color.push(req.body.color);
+        }
+        if(req.body.product_id) {
+          console.log("Update excute , ID: " + req.body.product_id + ", FILE: " + jsonInfoMultiFile);
+          if(jsonInfoMultiFile != "") {
+            collection.update(
+              { _id: parseInt(req.body.product_id)},
+              { $set:
+                { 
+                  type:{
+                    type_main : req.body.type_main,
+                    type : req.body.type
+                  },
+                  info_product: {
+                    name : req.body.name,
+                    name_utf: utf8(req.body.name),
+                    price : req.body.price, 
+                    description: req.body.description, 
+                    main_file: mainFile,
+                    color: color
+                  },
+                  file: JSON.parse("[" + jsonInfoMultiFile.substring(0, jsonInfoMultiFile.length -1) + "]")
+                }
+              }
+            );
+            jsonInfoMultiFile = "";
+            mainFile = "";
+          } else {
+            console.log("File not found");
+            collection.findOne({'_id': parseInt(req.body.product_id)}, function(err, product) {
+              collection.update(
+                { _id: parseInt(req.body.product_id)},
+                { $set:
+                  { 
+                    type:{
+                      type_main : req.body.type_main,
+                      type : req.body.type
+                    },
+                    info_product: {
+                      name : req.body.name,
+                      name_utf: utf8(req.body.name),
+                      price : req.body.price, 
+                      description: req.body.description, 
+                      main_file: product.info_product.main_file,
+                      color: color
+                    }
+                  }
+                }
+              );
+            });
+          }
+        } else {
+          console.log("Insert excute");
+          autoIncrement.getNextSequence(db, 'product', function (err, autoIndex) {
+            collection.insert({
+              _id: autoIndex,
+              type:{
+                type_main : req.body.type_main,
+                type : req.body.type
+              },
+              info_product: {
+                name : req.body.name,
+                name_utf: utf8(req.body.name),
+                price : req.body.price, 
+                description: req.body.description, 
+                main_file: mainFile,
+                color: color
+              },
+              file: JSON.parse("[" + jsonInfoMultiFile.substring(0, jsonInfoMultiFile.length -1) + "]")
+            });
+            jsonInfoMultiFile = "";
+            mainFile = "";
+          });
+        }
 			});
-			res.send("Save success!");
+			res.redirect('/admin_setting');
 		}
 	});
 });
@@ -680,6 +732,17 @@ app.post('/add_type',multer().array(), function (req, res) {
   	  res.send({info: "save success"});
   	});
 	});
+});
+
+app.post('/get_type_by_type_main',multer().array(), function (req, res) {
+  connection.when('available', function (err, db) {
+    var collection = db.collection('type');
+    collection.find({"type_main":req.body.type_main}).toArray(
+      function (err, result) {
+        res.send({data: result});
+      }
+    );
+  });
 });
 
 app.post("/buy_now", function(req, res){
@@ -1171,6 +1234,128 @@ app.get('/logout', function(req, res){
   res.redirect('/');
   req.session.notice = "You have successfully been logged out " + name + "!";
 });
+
+// ADMIN PAGE
+app.get("/admin_setting", function(req, res){
+  connection.when('available', function (err, db) {
+    var collectionType = db.collection('type');
+    var collectionTypeMain = db.collection('type_main');
+    collectionTypeMain.find().toArray(
+      function (err, result_main) {
+        if (err) {
+            console.log(err);
+        } else {
+          console.log("ID: " + result_main[0]._id);
+          collectionType.find({"type_main":result_main[0]._id}).toArray(
+            function (err, result) {
+              res.render("admin", {
+                types: result ,
+                type_mains: result_main 
+              });
+          });
+        }
+      }
+    );
+  });
+});
+
+app.post('/admin_product',multer().array(), function (req, res) {
+  connection.when('available', function (err, db) {
+    var collection = db.collection('product');
+    if(req.body.id) {
+      var id = parseInt(req.body.id);
+      collection.find({"_id": id}).toArray(
+        function (err, result) {
+          console.log("length: " + result.length + " ID: " + req.body.id);
+          res.send({"data": result});
+        }
+      );
+    } else {
+      collection.find({}).toArray(
+        function (err, result) {
+          console.log("length: " + result.length + " ID: " + req.body.id);
+          res.send({"data": result});
+        }
+      );
+    }
+  });
+});
+
+app.post('/admin_product_booking',multer().array(), function (req, res) {
+  connection.when('available', function (err, db) {
+    var collection = db.collection('product_booking');
+    if(req.body.id) {
+      var id = parseInt(req.body.id);
+      collection.find({"_id": id}).toArray(
+        function (err, result) {
+          console.log("length: " + result.length + " ID: " + req.body.id);
+          res.send({"data": result});
+        }
+      );
+    } else {
+      collection.find({}).toArray(
+        function (err, result) {
+          console.log("length: " + result.length + " ID: " + req.body.id);
+          res.send({"data": result});
+        }
+      );
+    }
+  });
+});
+
+app.post('/admin_user',multer().array(), function (req, res) {
+  connection.when('available', function (err, db) {
+    var collection = db.collection('users');
+    if(req.body.id) {
+      var id = parseInt(req.body.id);
+      collection.find({"_id": id}).toArray(
+        function (err, result) {
+          console.log("length: " + result.length + " ID: " + req.body.id);
+          res.send({"data": result});
+        }
+      );
+    } else {
+      collection.find({}).toArray(
+        function (err, result) {
+          console.log("length: " + result.length + " ID: " + req.body.id);
+          res.send({"data": result});
+        }
+      );
+    }
+  });
+});
+
+app.post('/product_info_edit',multer().array(), function (req, res) {
+  connection.when('available', function (err, db) {
+    var collection = db.collection('product');
+    var collectionType = db.collection('type');
+    var collectionTypeMain = db.collection('type_main');
+    collection.findOne({'_id': parseInt(req.body.productId)}, function(err, document) {
+      var type = document.type.type;
+      var typeMain = document.type.type_main;
+      collectionTypeMain.find().toArray(
+        function (err, result_type_main) {
+          if (err) {
+              console.log(err);
+          } else {
+            collectionType.find({"type_main":typeMain}).toArray(
+              function (err, result_type) {
+                res.send({
+                  "product": document, 
+                  "type_data" : result_type, 
+                  "type_main_data" : result_type_main,
+                  "type" : type,
+                  "type_main" : typeMain
+                });
+            });
+          }
+        }
+      );
+      
+    });
+  });
+});
+
 
 function utf8(str) {
   str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");

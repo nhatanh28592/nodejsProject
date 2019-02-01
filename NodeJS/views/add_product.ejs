@@ -18,9 +18,9 @@
 		<div class="form-group">
 			<label>Loại thiết bị:</label>
 			<select class="form-control" id="type_main" name="type_main">
-				<option value="1">Váy</option>
-				<option value="2">Quần jin nam</option>
-				<option value="3">Quần jin nữ</option>
+				<% type_mains.forEach(function(type_main) { %>
+		            <option value="<%= type_main._id %>"><%= type_main.name %></option>
+				<% }); %>
 			</select>
 			<label>Loai:</label>
 			<select class="form-control" id="type" name="type">
@@ -28,9 +28,6 @@
 		            <option value="<%= type._id %>"><%= type.name %></option>
 				<% }); %>
 			</select>
-			<input type="hidden" class="form-control" id="valueType" value="<%= value %>">
-			<input type="text" class="form-control" id="typeAdd">
-			<button id="add_type" class="btn btn-info" type="button">Add new type</button><br>
 			<label>Name:</label>
 			<input type="text" class="form-control" name="name" id="name">
 			<label>Giá:</label>
@@ -39,7 +36,7 @@
 			<input type="text" class="form-control" name="description" id="description">
 			<label>Màu:</label>
 			<div id="color">
-				<input type="color" class="form-control" name="color" calss="color">
+				<input type="color" class="form-control" name="color" class="color">
 			</div>
 			<button id="add_color" class="btn btn-info" type="button">Add color</button><br>
 			<label>Thêm hình ảnh:</label>
