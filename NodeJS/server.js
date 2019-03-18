@@ -133,7 +133,7 @@ passport.use('local-signup', new LocalStrategy(
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
   req.session.error = 'Please sign in!';
-  res.redirect('/signin');
+  res.redirect('/');
 }
 
 var logger = require('morgan');
@@ -1138,13 +1138,13 @@ app.get('/signin', function(req, res){
 
 app.post('/local-reg', passport.authenticate('local-signup', {
   successRedirect: '/',
-  failureRedirect: '/signin'
+  failureRedirect: '/'
   })
 );
 
 app.post('/login', passport.authenticate('local-signin', { 
   successRedirect: '/',
-  failureRedirect: '/signin'
+  failureRedirect: '/'
   })
 );
 
