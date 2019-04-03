@@ -5,14 +5,13 @@ $(document).ready(function () {
   }
   var infoLogin = $("input[name='key']").val();
   if (infoLogin) {
-    alert("VERSION: " + navigator.appVersion);
     var user = '{"user_info" : "' + infoLogin + '"}';
-    socket.emit('login', user);
+    socket.emit('login', infoLogin);
   }
 
-  $( window ).unload(function() {
-    socket.emit('disconnect_user', user);
-  });
+  // $( window ).unload(function() {
+  //   socket.emit('disconnect_user', user);
+  // });
 });
 
 $(function () {

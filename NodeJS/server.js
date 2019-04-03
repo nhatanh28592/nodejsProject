@@ -175,13 +175,12 @@ io.on('connection', function(socket){
 	console.log("socket: " + socket);
   socket.on('login', function(user){
     console.log("IP: " + ip.address());
-    var userObj = JSON.parse(user);
-    var values = Object.values(users);
-    console.log("MSG USER:" + userObj.user_info);
-    if (!values.includes(userObj.user_info)) {
-      users[socket.id] = userObj.user_info;
-    }
-    console.log(values);
+    //var values = Object.values(users);
+    console.log("USER LOGIN:" + user);
+    // if (!values.includes(user)) {
+    //   users[socket.id] = user;
+    // }
+    // console.log(values);
   });
   socket.on('message', function(msg){
   	console.log("MSG:" + msg);
