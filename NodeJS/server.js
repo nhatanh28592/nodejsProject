@@ -902,46 +902,52 @@ app.post("/buy_now_next_step", function(req, res){
       });
       jsonInfoMultiFile = "";
       mainFile = "";
-      var infoProductHtml = '';
-	    for (var i = 0; i < productData.length; i++) {
-			  infoProductHtml += '<div style="margin: auto;width: 60%;border: 2px solid red;padding: 10px;border-radius:5px">' +
-        							      	'<div  style="position:relative;">' + 
-          									    '<div><img src="' + fullUrl + '/upload/' + productData[i].product_info[0].main_file +'" alt="Logo" title="Logo" style="display:block;border: 1px solid;border-radius: 5px;" width="120" height="120" /></div>' + 
-          									    '<div style="position:absolute;width:250px;right:0;top:0;">'+
-          									    	'<p><b>Name: </b>' + productData[i].product_info[0].name + '</p>' +
-          									    	'<p><b>Số lượng: </b>' + productData[i].product_info[0].number + '</p>' +
-          									    	'<p><b>Màu sắc: </b>' + '<input type="color" value="' + productData[i].product_info[0].color +'" class="form-control" name="color" calss="color">' + '</p>' +
-          									    	'<p><b>Giá: </b><span style="color:red"><b>'+  productData[i].product_info[0].price +'</b></span></p>' +
-          									    '</div>' + 
-        									    '</div>' + 
-        							      	'<a href="'+ fullUrl +'/product_booking_detail?id=' + autoIndex + '"><button style="font-size: 20px;color: red;">XEM CHI TIẾT ĐƠN HÀNG</button></a>' +
-      							      	'</div> <br>';
-	    }
-			console.log("HYML: " + infoProductHtml);
-			//Send mail 
-			var mailOptions = {
-				from: 'nhatanh2852@gmail.com',
-				to: mailSend,
-				subject: 'Thông báo đặt hàng thành công',
-				forceEmbeddedImages: true,
-				html: '<div style="margin: auto;width: 60%;border: 3px solid #73AD21;padding: 10px;border-radius: 10px;">' + 
-				      	'<h1 style="color:red; text-align:center">XÁC NHẬN ĐẶT HÀNG THÀNH CÔNG</h1>' +
-				      	'<p>Xin chào ! <span style="color:red">'+ req.body.name +'</span> chúng tôi đã nhận được đơn đặt hàng của bạn, cảm ơn vì đã đặt hàng của chúng tôi, chúng tôi sẽ liên hệ và giao hàng đến bạn một cách sớm nhất</p>' +
-				      	infoProductHtml +
-				      	'<div>' +
-				      		'<img src="' + fullUrl + '/themes/img/logo.png" alt="Logo" title="Logo" style="display:block;" /> <br> <b>ĐIỆN NƯỚC HOÀNG PHI</b>' +
-				      		'<br><br><p>ĐC : Mai Đăng Chơn, Hoà Quý, Ngũ Hành Sơn, TP Đà Nẵng</p>' +
-				      		'<p>SDT: 01667288158</p>' +
-				      	'</div>' +
-				      '</div>'
-			};
-			transporter.sendMail(mailOptions, function(error, info){
-				if (error) {
-					console.log(error);
-				} else {
-					console.log('Email sent: ' + info.response);
-				}
-			});
+      try {
+        var infoProductHtml = '';
+        for (var i = 0; i < productData.length; i++) {
+          infoProductHtml += '<div style="margin: auto;width: 60%;border: 2px solid red;padding: 10px;border-radius:5px">' +
+                                '<div  style="position:relative;">' + 
+                                  '<div><img src="' + fullUrl + '/upload/' + productData[i].product_info[0].main_file +'" alt="Logo" title="Logo" style="display:block;border: 1px solid;border-radius: 5px;" width="120" height="120" /></div>' + 
+                                  '<div style="position:absolute;width:250px;right:0;top:0;">'+
+                                    '<p><b>Name: </b>' + productData[i].product_info[0].name + '</p>' +
+                                    '<p><b>Số lượng: </b>' + productData[i].product_info[0].number + '</p>' +
+                                    '<p><b>Màu sắc: </b>' + '<input type="color" value="' + productData[i].product_info[0].color +'" class="form-control" name="color" calss="color">' + '</p>' +
+                                    '<p><b>Giá: </b><span style="color:red"><b>'+  productData[i].product_info[0].price +'</b></span></p>' +
+                                  '</div>' + 
+                                '</div>' + 
+                                '<a href="'+ fullUrl +'/product_booking_detail?id=' + autoIndex + '"><button style="font-size: 20px;color: red;">XEM CHI TIẾT ĐƠN HÀNG</button></a>' +
+                              '</div> <br>';
+        }
+        console.log("HYML: " + infoProductHtml);
+        //Send mail 
+        var mailOptions = {
+          from: 'nhatanh2852@gmail.com',
+          to: mailSend,
+          subject: 'Thông báo đặt hàng thành công',
+          forceEmbeddedImages: true,
+          html: '<div style="margin: auto;width: 60%;border: 3px solid #73AD21;padding: 10px;border-radius: 10px;">' + 
+                  '<h1 style="color:red; text-align:center">XÁC NHẬN ĐẶT HÀNG THÀNH CÔNG</h1>' +
+                  '<p>Xin chào ! <span style="color:red">'+ req.body.name +'</span> chúng tôi đã nhận được đơn đặt hàng của bạn, cảm ơn vì đã đặt hàng của chúng tôi, chúng tôi sẽ liên hệ và giao hàng đến bạn một cách sớm nhất</p>' +
+                  infoProductHtml +
+                  '<div>' +
+                    '<img src="' + fullUrl + '/themes/img/logo.png" alt="Logo" title="Logo" style="display:block;" /> <br> <b>ĐIỆN NƯỚC HOÀNG PHI</b>' +
+                    '<br><br><p>ĐC : Mai Đăng Chơn, Hoà Quý, Ngũ Hành Sơn, TP Đà Nẵng</p>' +
+                    '<p>SDT: 01667288158</p>' +
+                  '</div>' +
+                '</div>'
+        };
+        transporter.sendMail(mailOptions, function(error, info){
+          if (error) {
+            console.log(error);
+          } else {
+            console.log('Email sent: ' + info.response);
+          }
+        });
+      }
+      catch (e) {
+        console.log("SENT MAIL ERROR: " + e);
+      }
+      
     });
   });
 
