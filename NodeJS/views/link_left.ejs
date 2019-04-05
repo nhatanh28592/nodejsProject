@@ -1,13 +1,3 @@
 <div id="sidebar">
-	<ul id="sideManu" class="nav nav-tabs nav-stacked">
-		<% types.forEach(function(type) { %>
-			<li class="subMenu open"><a> <%= type.name %></a>
-            	<ul>
-            		<% type.type_info.forEach(function(data) { %>
-            			<li><a class="active" href="/product_list?type_main=<%= type._id %>&type=<%= data._id %>"><i class="icon-chevron-right"></i><%= data.name %></a></li>
-            		<% }); %>
-            	</ul>
-            </li>
-		<% }); %>
-	</ul>
+      <img class="" src="themes/img/banner.png" alt="" style="width:95%">
 </div>

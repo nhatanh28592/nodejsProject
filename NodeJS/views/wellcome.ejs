@@ -6,7 +6,7 @@
 		</div>
 		<div class="col-sm-2">
          <a href="/">
-         	<img src="themes/img/logo.png" style="float:left;border: 0px solid #a1a1a1;">
+         	<img src="themes/img/logo.gif" style="float:left;border: 0px solid #a1a1a1;">
          </a>
         </div>
 		<div class="col-sm-8">
@@ -34,7 +34,7 @@
 	            <div class="col-sm-4">
 	                <ul class="nav navbar-nav navbar-right">
 				      <li class="btn-info <% if(total_product == 0) { %> disabled<%}%>">
-				     	 <a href="buy_now"><span class="glyphicon glyphicon-shopping-cart product_add"><span class="product_add" style="color:red;font-weight: bold;">[<%= total_product %>]</span></span></a>
+				     	 <a href="buy_now"><span class="glyphicon glyphicon-shopping-cart"><span class="product_add_cart" style="color:red;font-weight: bold;">[<%= total_product %>]</span></span></a>
 				      </li>
 				      <% if(user){ %>
 				      		<li class="btn-success"><a href="#"><span class="glyphicon glyphicon-user"></span> <%= user.user_name %></a></li>
@@ -62,4 +62,4 @@
 		</div>
 	</div>
 </div>
-
+<br>

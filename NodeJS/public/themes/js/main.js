@@ -9,6 +9,14 @@ $(document).ready(function () {
     socket.emit('login', infoLogin);
   }
 
+  $(".linkfeat").hover(
+    function () {
+        $(".textfeat").show(500);
+    },
+    function () {
+        $(".textfeat").hide(500);
+    }
+  );
   // $( window ).unload(function() {
   //   socket.emit('disconnect_user', user);
   // });

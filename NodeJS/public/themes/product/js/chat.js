@@ -50,7 +50,11 @@ $(function () {
 	});
 
     $("#addClass").click(function () { 
-    	refreshListChat();
+    	if($("input[name='user']").val()) {
+    		refreshListChat();
+    	} else {
+    		$('#modal_login').modal('show');
+    	}
     });
 
 	$('div').delegate( ".popup-head-list-chat", "click", function() {

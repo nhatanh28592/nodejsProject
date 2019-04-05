@@ -271,7 +271,7 @@ app.get("/", function(req, res){
       function (err, result) {
         if (err) {
             console.log(err);
-        } else if (result.length) {
+        } else {
           var total;
         	var cookie = req.cookies.cookieName;
         	if (cookie == undefined) {
@@ -295,10 +295,16 @@ app.get("/", function(req, res){
             function (err, res_type) {
               if (err) {
                 console.log(err);
-              } else if (res_type.length) {
+              } else {
               	var prevPager = page - 1;
               	var nextPager = page + 1;
-    	 					res.render("index", {products: result.slice(numberPager*page, numberPager*page + numberPager) , 
+                var resultTmp;
+                if (result.length) {
+                  resultTmp = result.slice(numberPager*page, numberPager*page + numberPager);
+                } else {
+                  resultTmp = [];
+                }
+    	 					res.render("index", {products: resultTmp, 
     	 						total_product: total, types: res_type, 
     	 						count: (result.length/numberPager),
     	 						prevPager: prevPager,
@@ -307,15 +313,9 @@ app.get("/", function(req, res){
     	 						list: false, 
     	 						user: req.user
     	 					});
-              } else {
-                console.log('No document(s) found with defined "find" criteria!');
-                res.send("Error");
               }
             }
           );
-        } else {
-          console.log('No document(s) found with defined "find" criteria!');
-          res.send("Error");
         }
       }
     );
@@ -340,7 +340,7 @@ app.get("/product_list", function(req, res){
       function (err, result) {
         if (err) {
           console.log(err);
-        } else if (result.length) {
+        } else {
           var total;
         	var cookie = req.cookies.cookieName;
         	console.log("cookie da co la: " + cookie)
@@ -364,10 +364,16 @@ app.get("/product_list", function(req, res){
             function (err, res_type) {
               if (err) {
                   console.log(err);
-              } else if (res_type.length) {
+              } else {
               	var prevPager = page - 1;
               	var nextPager = page + 1;
-    	 					res.render("index", {products: result.slice(numberPager*page, numberPager*page + numberPager) , 
+                var resultTmp;
+                if (result.length) {
+                  resultTmp = result.slice(numberPager*page, numberPager*page + numberPager);
+                } else {
+                  resultTmp = [];
+                }
+    	 					res.render("index", {products: resultTmp, 
     	 						total_product: total, types: res_type, 
     	 						count: (result.length/numberPager),
     	 						prevPager: prevPager,
@@ -378,15 +384,9 @@ app.get("/product_list", function(req, res){
     	 						type: type, 
                   user: req.user
     	 					});
-              } else {
-                console.log('No document(s) found with defined "find" criteria!');
-                res.send("Error");
               }
             }
 		      );
-        } else {
-          console.log('No document(s) found with defined "find" criteria!');
-          res.send("Error");
         }
       }
     );
@@ -719,6 +719,24 @@ app.post('/add_product_to_cart',multer().array(), function (req, res) {
 	}
 });
 
+app.post('/delete_product_from_cart',multer().array(), function (req, res) {
+  var index = parseInt(req.body.id);
+  var cookie = req.cookies.cookieName;
+  var productData = myCache.get(cookie);
+  if (productData == undefined) {
+    res.send({delete_status: 0, total: myCache.get(cookie).length});
+  } else {
+    productData.splice(index, 1);
+    myCache.set( cookie, productData, function( err, success ){
+      if( !err && success ){
+        console.log( success ); 
+        console.log("SIZE: " + myCache.get(cookie).length) 
+      }
+    });
+    res.send({delete_status: 1, total: productData.length});
+  }
+});
+
 app.post('/add_type',multer().array(), function (req, res) {
 	connection.when('available', function (err, db) {
     autoIncrement.getNextSequence(db, 'type', function (err, autoIndex) {
@@ -930,7 +948,7 @@ app.post("/buy_now_next_step", function(req, res){
                   '<p>Xin chào ! <span style="color:red">'+ req.body.name +'</span> chúng tôi đã nhận được đơn đặt hàng của bạn, cảm ơn vì đã đặt hàng của chúng tôi, chúng tôi sẽ liên hệ và giao hàng đến bạn một cách sớm nhất</p>' +
                   infoProductHtml +
                   '<div>' +
-                    '<img src="' + fullUrl + '/themes/img/logo.png" alt="Logo" title="Logo" style="display:block;" /> <br> <b>ĐIỆN NƯỚC HOÀNG PHI</b>' +
+                    '<img src="' + fullUrl + '/themes/img/logo.gif" alt="Logo" title="Logo" style="display:block;" /> <br> <b>ĐIỆN NƯỚC HOÀNG PHI</b>' +
                     '<br><br><p>ĐC : Mai Đăng Chơn, Hoà Quý, Ngũ Hành Sơn, TP Đà Nẵng</p>' +
                     '<p>SDT: 01667288158</p>' +
                   '</div>' +
@@ -1193,7 +1211,9 @@ app.post('/open_chat',multer().array(), function (req, res) {
 
 // Show list chat
 app.post('/list_chat',multer().array(), function (req, res) {
-  var values = Object.values(users);
+  //var values = Object.values(users);
+  var values = [];
+  values.push("values");
   connection.when('available', function (err, db) {
     var collection = db.collection('users');
     collection.find({}).toArray(

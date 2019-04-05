@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Hoàng Phi</title>
+    <title>Wartec</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -17,7 +17,7 @@
 <!-- Google-code-prettify -->	
 	<link href="themes/js/google-code-prettify/prettify.css" rel="stylesheet"/>
 <!-- fav and touch icons -->
-    <link rel="shortcut icon" href="themes/img/logo.png">
+    <link rel="shortcut icon" href="themes/img/logo.gif">
     <link rel="apple-touch-icon-precomposed" sizes="144x144" href="themes/images/ico/apple-touch-icon-144-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="themes/images/ico/apple-touch-icon-114-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="72x72" href="themes/images/ico/apple-touch-icon-72-precomposed.png">
@@ -111,7 +111,7 @@
 				    </thead>
 				    <tbody>
 						<% products.forEach(function(product) { %>
-						<% product.product_info.forEach(function(info) { %>
+						<% product.product_info.forEach(function(info, index) { %>
 							<tr>
 						     	<td><%= info.name %></td>
 						     	<td style="background-color:<%= info.color %>"></td>
@@ -122,9 +122,10 @@
 						    		<button type="button" class="btn btn-default btn-sm">
 						          		<span class="glyphicon glyphicon-edit"></span>
 						        	</button>
-						    		<button type="button" class="btn btn-default btn-sm">
+						    		<button type="button" class="btn btn-default btn-sm btn-delete">
 										<span class="glyphicon glyphicon-remove"></span> 
 							        </button>
+							        <input type="hidden" name="id" value="<%= index %>">
 						    	</td>
 							</tr>
 						<% }); %>

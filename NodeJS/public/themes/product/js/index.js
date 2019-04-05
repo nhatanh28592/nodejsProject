@@ -26,8 +26,8 @@ $(document).ready(function(){
 		        dataType: 'json',
 		        contentType: 'application/json; charset=utf-8',
 		        success: function (data) {  
-		         	$(".product_add").text("[" + data.product_total + "]");
-		         	$("div.btnCart").removeClass("disabled");
+		         	$(".product_add_cart").text("[" + data.product_total + "]");
+             		$(".product_add_cart").parent().parent().parent().removeClass("disabled");
 		         	swal({
 						 title: "Thông báo",
 						 text: "1 sản phẩm đã được thêm thành công vào giỏ hàng, click vào giỏ hàng để xem chi tiết",

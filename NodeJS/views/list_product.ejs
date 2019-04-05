@@ -1,4 +1,25 @@
-<br>
+<nav class="navbar" style="background-image: linear-gradient(45deg,#007bff 0%,#006fe6 100%);">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><b>Wartec</b></a>
+    </div>
+    <ul class="nav navbar-nav">
+      <% types.forEach(function(type) { %>
+      <li class="dropdown" style="margin-left: 15px;margin-right: 15px;">
+      <a class="dropdown-toggle" data-toggle="dropdown" href="#"><b><%= type.name %></b><span class="caret"></span></a>
+        <ul class="dropdown-menu">
+        	<% type.type_info.forEach(function(data) { %>
+         		<li><a class="dropdown-item" href="/product_list?type_main=<%= type._id %>&type=<%= data._id %>"><i class="icon-chevron-right"></i><b><%= data.name %></b></a></li>
+         	<% }); %>
+        </ul>
+      </li>
+      <% }); %>
+    </ul>
+  </div>
+</nav>
+<% if(products.length == 0){ %>
+	<div>Không tìm thấy sản phẩm nào ! </div>
+<% }%> 
 <% products.forEach(function(product, index) { %>
 	<% if(index == 0){ %>
 		<div class="row">

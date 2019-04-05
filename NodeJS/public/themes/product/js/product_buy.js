@@ -7,6 +7,26 @@ $(document).ready(function(){
                return false;
     }
    });
+  $("button.btn-delete").click(function(){
+    var id = $(this).parent().next().val();
+    $.ajax({
+          type: 'POST',
+          url: "/delete_product_from_cart",
+          async: true,
+          data:JSON.stringify({
+                  id: id
+          }),
+          dataType: 'json',
+          contentType: 'application/json; charset=utf-8',
+          success: function (data) {  
+            alert("status: " + data.delete_status);
+          },
+          error: function (xhr, ajaxOptions, thrownError) { 
+            alert("error");
+            return false;
+          }
+    });
+  });
 });
 
 function validate_activity() {
