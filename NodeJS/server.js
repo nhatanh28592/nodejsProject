@@ -703,7 +703,6 @@ app.post('/add_product_to_cart',multer().array(), function (req, res) {
 		myCache.set( cookie, data, function( err, success ){
 	  	if( !err && success ){
 		    console.log( success ); 
-		    console.log("SIZE: " + myCache.get(cookie).length) 
 		  }
 		});
     res.send({product_total: myCache.get(cookie).length});
@@ -712,7 +711,6 @@ app.post('/add_product_to_cart',multer().array(), function (req, res) {
 		myCache.set( cookie, productData, function( err, success ){
 	  	if( !err && success ){
 		    console.log( success ); 
-		    console.log("SIZE: " + myCache.get(cookie).length) 
 		  }
 		});
     res.send({product_total: myCache.get(cookie).length});
@@ -723,14 +721,13 @@ app.post('/delete_product_from_cart',multer().array(), function (req, res) {
   var index = parseInt(req.body.id);
   var cookie = req.cookies.cookieName;
   var productData = myCache.get(cookie);
-  if (productData == undefined) {
+  if (productData == undefined && myCache.get(cookie) != undefined) {
     res.send({delete_status: 0, total: myCache.get(cookie).length});
   } else {
     productData.splice(index, 1);
     myCache.set( cookie, productData, function( err, success ){
       if( !err && success ){
         console.log( success ); 
-        console.log("SIZE: " + myCache.get(cookie).length) 
       }
     });
     res.send({delete_status: 1, total: productData.length});
@@ -948,9 +945,9 @@ app.post("/buy_now_next_step", function(req, res){
                   '<p>Xin chào ! <span style="color:red">'+ req.body.name +'</span> chúng tôi đã nhận được đơn đặt hàng của bạn, cảm ơn vì đã đặt hàng của chúng tôi, chúng tôi sẽ liên hệ và giao hàng đến bạn một cách sớm nhất</p>' +
                   infoProductHtml +
                   '<div>' +
-                    '<img src="' + fullUrl + '/themes/img/logo.gif" alt="Logo" title="Logo" style="display:block;" /> <br> <b>ĐIỆN NƯỚC HOÀNG PHI</b>' +
-                    '<br><br><p>ĐC : Mai Đăng Chơn, Hoà Quý, Ngũ Hành Sơn, TP Đà Nẵng</p>' +
-                    '<p>SDT: 01667288158</p>' +
+                    '<img src="' + fullUrl + '/themes/img/logo.gif" alt="Logo" title="Logo" style="display:block;" /> <br> <b>ĐIỆN NƯỚC WARTEC</b>' +
+                    '<br><br><p>ĐC : 138/45 Hoàng Văn Thái, quận Liên Chiểu, TP Đà Nẵng</p>' +
+                    '<p>SDT: 0389.501.059 - 0946.276370</p>' +
                   '</div>' +
                 '</div>'
         };
@@ -1023,7 +1020,7 @@ app.post("/buy_now_next_step", function(req, res){
 app.get("/product_booking_detail", function(req, res){
 	var cookie = req.cookies.cookieName;
 	var total = 0;
-	if(cookie != undefined) {
+	if(cookie != undefined && myCache.get(cookie) != undefined) {
 		total = myCache.get(cookie).length;
 	}
 	connection.when('available', function (err, db) {
