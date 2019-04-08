@@ -63,7 +63,8 @@ passport.use(new GoogleStrategy({
      google_id: profile.id.toString(),
      user_name:profile.displayName.toString(), 
      display_name: profile.name.toString(),
-     picture: profile.photos ? profile.photos[0].value : 'themes/img/user_default.jpg'
+     picture: profile.photos ? profile.photos[0].value : 'themes/img/user_default.jpg',
+     role: 'user'
     }, function (err, user) {
       return done(err, user);
     });
@@ -80,7 +81,8 @@ passport.use(new FacebookStrategy({
     console.log("DA CHAY VO DAY NHA ID: " + profile.id );
     User.findOrCreate({ facebook_id: profile.id.toString()}, {
      facebook_id: profile.id.toString(),
-     user_name: profile.displayName.toString()
+     user_name: profile.displayName.toString(),
+     role: 'user'
     }, function (err, user) {
       return done(err, user);
     });

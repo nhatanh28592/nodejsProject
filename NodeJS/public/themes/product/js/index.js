@@ -92,9 +92,7 @@ $(document).ready(function(){
 
              	$("div.color_modal").html('');
 
-             	for (var i = 0; i < color.length; i++) {
-             		$("div.color_modal").append('<div>Số lượng: <input type="number" name="input_number_product" class="" value="0" min="0"><input type="color" value="' + color[i] + '" name="color" disabled=""></div>');
-             	}
+         		$("div.color_modal").append('<div>Số lượng: <input type="number" name="input_number_product" class="" value="0" min="0"></div>');
 
              	$("div.input_type_hidden").html('');
              	$("div.input_type_hidden").append('<input type="hidden" name="product_id" value="' +  data.product._id + '">');

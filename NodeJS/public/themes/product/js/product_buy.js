@@ -4,11 +4,12 @@ $(document).ready(function(){
      if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
         //display error message
         $("#errmsg_mobile").html("Vui lòng chỉ nhập số !").show().fadeOut(3000);
-               return false;
+        return false;
     }
    });
   $("button.btn-delete").click(function(){
     var id = $(this).parent().next().val();
+    var root = $(this);
     $.ajax({
           type: 'POST',
           url: "/delete_product_from_cart",
@@ -19,7 +20,16 @@ $(document).ready(function(){
           dataType: 'json',
           contentType: 'application/json; charset=utf-8',
           success: function (data) {  
-            alert("status: " + data.delete_status);
+            swal({
+               title: "Thông báo",
+               text: "Xóa sản phẩm thành công !",
+               type: "success",
+               confirmButtonText: "close"
+            });
+            root.parent().parent().remove(); 
+            if (data.total == 0) {
+              window.location.href = "/";
+            }
           },
           error: function (xhr, ajaxOptions, thrownError) { 
             alert("error");

@@ -20,6 +20,11 @@ $(document).ready(function () {
   // $( window ).unload(function() {
   //   socket.emit('disconnect_user', user);
   // });
+
+  $(".money_format").each(function(){
+        var money = $(this).text();
+        $(this).text(money.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'));
+    });
 });
 
 $(function () {

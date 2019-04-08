@@ -79,11 +79,12 @@
 	<nav class="navbar navbar-default">
 	  <div class="container-fluid">
 	    <div class="navbar-header">
-	      <a class="navbar-brand" href="#">Admin Setting</a>
+	      <a class="navbar-brand" href="/">
+	      	<img src="themes/img/logo.gif">
+	      </a>
 	    </div>
 	    <ul class="nav navbar-nav navbar-right">
-	      <li><a href="#"><span class="glyphicon glyphicon-user"></span> Sign Up</a></li>
-	      <li><a href="#"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+
 	    </ul>
 	  </div>
 	</nav>
@@ -124,8 +125,8 @@
 					<button class="btn btn-success add" data-toggle="modal" data-target=""><span class="glyphicon glyphicon-plus"></span> Thêm</button>
 				</div>
 				<br/>
-				<div class="map">
-					<form class="form-inline input_map" action="" style="display:none;">
+				<div class="map" id="map_setting" style="display:none;">
+					<form class="form-inline input_map" action="" style="">
 						<div class="form-group">
 							<input type="text" class="form-control" placeholder="Vị trí bắt đầu"  name="map_start">
 						</div>

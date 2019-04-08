@@ -1,6 +1,7 @@
 $(document).ready(function(){
     $("button.product").click(function(){
         $("div.map").hide();
+        $("#map_setting").hide();
         $("button.add").attr('data-target','#modalProduct');
         $.ajax({
             type: 'POST',
@@ -22,6 +23,7 @@ $(document).ready(function(){
     });
 
     $("button.product_booking").click(function(){
+        $("#map_setting").show();
         $.ajax({
             type: 'POST',
             url: "/admin_product_booking",
@@ -43,6 +45,7 @@ $(document).ready(function(){
 
     $("button.user").click(function(){
         $("div.map").hide();
+        $("#map_setting").hide();
         $.ajax({
             type: 'POST',
             url: "/admin_user",

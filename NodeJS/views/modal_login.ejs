@@ -15,23 +15,23 @@
               <a href="/auth/facebook" class="btn btn-primary btn-md" role="button"><span class="glyphicon glyphicon-user"></span> Sign in with Facebook</a>
               </div>
               <br>
-              <label for="uname"><b>Email</b></label>
-              <input type="email" class="user_name" placeholder="Enter Email" name="username" required>
+              <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#login_form">Login Form</button>
+              <div id="login_form" class="collapse">
+                <label for="uname"><b>Email</b></label>
+                <input type="email" class="user_name" placeholder="Enter Email" name="username" required>
 
-              <label for="psw"><b>Password</b></label>
-              <input type="password" placeholder="Enter Password" name="password" required>
+                <label for="psw"><b>Password</b></label>
+                <input type="password" placeholder="Enter Password" name="password" required>
 
-              <button type="submit" class="btn_login">Login</button>
-              <label>
-                <input type="checkbox" checked="checked" name="remember"> Remember me
-              </label>
+                <button type="submit" class="btn_login">Login</button>
+                <label>
+                  <input type="checkbox" checked="checked" name="remember"> Remember me
+                </label>
+              </div>
             </div>
 
             <div class="container_login" style="background-color:#f1f1f1">
               <button type="button" class="cancelbtn" data-dismiss="modal">Cancel</button>
-              <span class="psw">
-                <a data-toggle="modal" id="create_account" data-dismiss="modal" data-target="#modal_singup" style="color:#337ab7">Create account</a> or <a href="#" style="color:#337ab7">reset password</a>
-              </span>
             </div>
           </form>
         </div>

@@ -50,6 +50,9 @@
 									<input type="hidden" name="key" value="<%= user.user_name %>">
 					      		<% } %>
 				      		<% } %>
+				      		<% if(user.role == 'admin'){ %>
+				      			<li class="btn-primary"><a href="admin_setting"><span class="glyphicon glyphicon-cog"></span></a></li>
+				      		<% } %>
 		            		<li class="btn-warning"><a href="logout"><span class="glyphicon glyphicon-log-in"></span> Logout</a></li>
 						<% } else{ %>
 						<li class="btn-success" name="login" data-toggle="modal" data-target="#modal_login"><a href="#"><span class="glyphicon glyphicon-user"></span> Login</a></li>

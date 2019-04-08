@@ -1,5 +1,7 @@
 
 $(document).ready(function(){
+	var priceProduct = $("#price_product").text();
+	$("#price_product").text( " " + priceProduct.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + " VND");
    	$("input[name='input_number_product']").bind('keyup mouseup', function () {
    		var number_choose = 0;
    		$("input[name='input_number_product']").each(function(){
@@ -16,7 +18,7 @@ $(document).ready(function(){
    		var price = parseInt($("input[name='price']").val());
    		var total = number_choose*price;
    		$("input[name='total']").val(number_choose);
-   		$("#money").text(total + " $");
+   		$("#money").text(total + " VND");
 	});
 
 	$("button[name='add_cart']").click(function(){
