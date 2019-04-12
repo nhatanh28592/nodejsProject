@@ -36,7 +36,7 @@
 <body>
 <%- include wellcome.ejs %>
 <div class="offcanvas-wrapper">
-<section class="container padding-top-1x">
+<section class="container padding-top-3x">
 	<h3 class="text-center mb-30">XÁC NHẬN ĐƠN HÀNG</h3>
 		<div class="row">
 		<div class="col-md-6 col-sm-6" style="background: aliceblue;">
@@ -92,11 +92,8 @@
 				    	<td class="money_format"><%= info.price %></td>
 				    	<td class="money_format"><%= info.price*info.number %></td>
 				    	<td>
-				    		<button type="button" class="btn btn-default btn-sm">
-				          		<span class="glyphicon glyphicon-edit"></span>
-				        	</button>
-				    		<button type="button" class="btn btn-default btn-sm btn-delete">
-								<span class="glyphicon glyphicon-remove"></span> 
+				    		<button type="button" class="btn-danger btn-sm btn-delete">
+								<i class="icon-delete"></i>
 					        </button>
 					        <input type="hidden" name="id" value="<%= index %>">
 				    	</td>

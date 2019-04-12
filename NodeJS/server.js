@@ -30,7 +30,7 @@ var autoIncrement = require("mongodb-autoincrement");
 //var url = 'mongodb://localhost:27017/test';
 var url = 'mongodb://nhatanh285:hna2851992@ds113835.mlab.com:13835/nhatanh_test';
 // Number of page
-var numberPager = 3;
+var numberPager = 15;
 
 var connection = new connectOnce({ 
   retries: 60, 
