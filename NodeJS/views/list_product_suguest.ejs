@@ -1,45 +1,41 @@
-<br>
+<section class="container padding-top-1x">
+<h3 class="text-center mb-30">Sản Phẩm liên quan</h3>
+<% if(products.length == 0){ %>
+	<div>Không tìm thấy sản phẩm nào ! </div>
+<% }%> 
 <% products.forEach(function(product, index) { %>
 	<% if(index == 0){ %>
 		<div class="row">
 	<% } else{ %>  
-		<% if(index%4 == 0){ %>
+		<% if(index%3 == 0){ %>
 			</div>
 			<div class="row">
 		<% }%> 
 	<% } %>
-	<div class="col-sm-3">
-		<div class="thumbnail">
-			<br>
-			<a  href="product_details?productId=<%= product._id %>&type_main=<%= product.type.type_main %>&type=<%= product.type.type %>"><img src="upload/<%= product.info_product.main_file %>" alt="" style="width:200px; height:200px"/></a>
-			<div class="caption">
-			  <h5>
-			  <a class="" href="product_details?productId=<%= product._id %>&type_main=<%= product.type.type_main %>&type=<%= product.type.type %>"> 
-		  			<%= product.info_product.name %>
-			  </a>
-			  </h5>			 
-			  <div>
-		          <span class="glyphicon glyphicon-star-empty"></span> 
-		          <span class="glyphicon glyphicon-star-empty"></span>
-		          <span class="glyphicon glyphicon-star-empty"></span> 
-		          <span class="glyphicon glyphicon-star-empty"></span>
-		          <span class="glyphicon glyphicon-star-empty"></span> 
-		          <a class="btn" href="product_details?productId=<%= product._id %>&type_main=<%= product.type.type_main %>&type=<%= product.type.type %>"> 
-		  			<span class="glyphicon glyphicon-eye-open"></span>
-				  </a> 
-				  <a class="btn open_modal" data-toggle="modal" data-target="#myModal">
-				  	<span class="glyphicon glyphicon-shopping-cart"></span>
-				  </a> 
-	  			  <input type="hidden" name="" value="<%= product._id %>">
-		       </div>
-			  <strong style="color:red" class="money"><%= product.info_product.price %> Đ</strong>
-			</div>
+	<div class="col-md-4 col-sm-6">
+			<div class="card mb-30"><a class="card-img-tiles" href="product_details?productId=<%= product._id %>&type_main=<%= product.type.type_main %>&type=<%= product.type.type %>">
+			<div class="inner">
+				<div class="main-img"><img src="upload/<%= product.info_product.main_file %>" alt="Category"></div>
+				<div class="thumblist">
+				<% product.file.forEach(function(file, index) { %>
+					<% if(index != 0){ %>
+						<img src="upload/<%= file.fileName %>" alt="Category">
+					<% }%> 
+				<% }); %>
+				</div>
+            </div></a>
+			<div class="card-body text-center">
+                <h4 class="card-title"><%= product.info_product.name %></h4>
+                <p class="money_format" style="color:red; font-weight:bold;" ><%= product.info_product.price %> VND</p>
+                <a class="btn btn-outline-primary btn-sm" href="product_details?productId=<%= product._id %>&type_main=<%= product.type.type_main %>&type=<%= product.type.type %>">View Products</a>
+            </div>
 		</div>
 	</div>
 	<% if(index == (products.length -1)) { %>
 		</div>
 	<% }%> 
 <% }); %>
+</section>
 <div class="text-center">
 	<ul class="pagination">
 		<li class="page-item <% if(prevPager == -1) { %> disabled <%}%>" >

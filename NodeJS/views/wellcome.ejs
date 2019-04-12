@@ -1,68 +1,116 @@
-<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-<link href="themes/css/find.css" rel="stylesheet" type="text/css">
-<div id="myHeader">
-	<div class="row">
-		<div class="col-sm-2">
-		</div>
-		<div class="col-sm-2">
-         <a href="/">
-         	<img src="themes/img/logo.gif" style="float:left;border: 0px solid #a1a1a1;">
-         </a>
+<div class="offcanvas-container" id="shop-categories">
+      <div class="offcanvas-header">
+        <h3 class="offcanvas-title">Shop Categories</h3>
+      </div>
+      <nav class="offcanvas-menu">
+        <ul class="menu">
+          <li class="has-children"><span><a href="#">Men's Shoes</a><span class="sub-menu-toggle"></span></span>
+            <ul class="offcanvas-submenu"><li class="back-btn"><a href="#">Back</a></li>
+              <li><a href="#">Sneakers</a></li>
+              <li><a href="#">Loafers</a></li>
+              <li><a href="#">Boat Shoes</a></li>
+              <li><a href="#">Sandals</a></li>
+              <li><a href="#">View All</a></li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <!-- Topbar-->
+    <div class="topbar">
+      <div class="topbar-column"><a class="hidden-md-down" href="mailto:support@unishop.com"><i class="icon-mail"></i>&nbsp; support@unishop.com</a><a class="hidden-md-down" href="tel:00331697720"><i class="icon-bell"></i>&nbsp; 00 33 169 7720</a><a class="social-button sb-facebook shape-none sb-dark" href="#" target="_blank"><i class="socicon-facebook"></i></a><a class="social-button sb-twitter shape-none sb-dark" href="#" target="_blank"><i class="socicon-twitter"></i></a><a class="social-button sb-instagram shape-none sb-dark" href="#" target="_blank"><i class="socicon-instagram"></i></a><a class="social-button sb-pinterest shape-none sb-dark" href="#" target="_blank"><i class="socicon-pinterest"></i></a>
+      </div>
+    </div>
+    <header class="navbar navbar-sticky navbar-stuck">
+      <!-- Search-->
+      <form class="site-search" method="get">
+        <input type="text" name="search" placeholder="Tìm kiếm sản phẩm ...">
+        <div class="search-tools"><span class="clear-search">Clear</span><span class="close-search"><i class="icon-cross"></i></span></div>
+      </form>
+      <div class="site-branding">
+        <div class="inner">
+          <a class="offcanvas-toggle cats-toggle" href="#shop-categories" data-toggle="offcanvas"></a>
+          <a class="site-logo" href="/"><img src="themes/img/logo.gif" alt="Wartec" style="width:50px;height:50px"></a>
         </div>
-		<div class="col-sm-8">
-			<div class="row row1">
-	            
-	        </div>
-	        <div class="row row2">
-	            <div class="col-sm-7">
-	                <div class="row">
-		                <div id="custom-search-input">
-			                <div class="input-group col-md-12">
-			                    <input class="form-control" type="text" name="search" placeholder="Tìm kiếm sản phẩm">
-			                    <span class="input-group-btn">
-			                        <button class="btn btn-info" name="search" type="button">
-			                            <span class="glyphicon glyphicon-search"></span>
-			                        </button>
-			                    </span>
-			                </div>
-			            </div>
-	                </div>
-	                <div class="alert alert-success" style="display:none; border: 1px solid red">
-					    <strong style="color:red">1 sản phẩm </strong> được thêm thành công vào giỏ hàng click vào giỏ hàng để xem chi tiết
-					</div>
-	            </div>
-	            <div class="col-sm-4">
-	                <ul class="nav navbar-nav navbar-right">
-				      <li class="btn-info <% if(total_product == 0) { %> disabled<%}%>">
-				     	 <a href="buy_now"><span class="glyphicon glyphicon-shopping-cart"><span class="product_add_cart" style="color:red;font-weight: bold;">[<%= total_product %>]</span></span></a>
-				      </li>
-				      <% if(user){ %>
-				      		<li class="btn-success"><a href="#"><span class="glyphicon glyphicon-user"></span> <%= user.user_name %></a></li>
-				      		<input type="hidden" name="user" value="<%= user.user_name %>">
-				      		<% if(user.facebook_id){ %>
-				      			<input type="hidden" name="key" value="<%= user.facebook_id %>">
-				      			<input type="hidden" name="url_picture_user" value="http://graph.facebook.com/<%= user.facebook_id %>/picture?type=normal">
-				      		<% } else { %>
-				      			<input type="hidden" name="url_picture_user" value="<%= user.picture %>">
-				      			<% if(user.google_id){ %>
-				      				<input type="hidden" name="key" value="<%= user.google_id %>">
-					      		<% } else { %>
-									<input type="hidden" name="key" value="<%= user.user_name %>">
-					      		<% } %>
-				      		<% } %>
-				      		<% if(user.role == 'admin'){ %>
-				      			<li class="btn-primary"><a href="admin_setting"><span class="glyphicon glyphicon-cog"></span></a></li>
-				      		<% } %>
-		            		<li class="btn-warning"><a href="logout"><span class="glyphicon glyphicon-log-in"></span> Logout</a></li>
-						<% } else{ %>
-						<li class="btn-success" name="login" data-toggle="modal" data-target="#modal_login"><a href="#"><span class="glyphicon glyphicon-user"></span> Login</a></li>
-					  <% } %>
-				    </ul>
+      </div>
+      <!-- Main Navigation-->
+      <nav class="site-menu">
+        <ul>
+          <li class="has-megamenu active"><a href="/"><span>Home</span></a>
+          </li>
+          <% types.forEach(function(type) { %>
+		      <li><a><span><%= type.name %></span></a>
+		        <ul class="sub-menu">
+		        	<% type.type_info.forEach(function(data) { %>
+						<li><a href="/product_list?type_main=<%= type._id %>&type=<%= data._id %>"><%= data.name %></a></li>
+		         	<% }); %>
+		        </ul>
+		      </li>
+		  <% }); %>
+          </ul>
+          </li>
+        </ul>
+      </nav>
+      <!-- Toolbar-->
+      <div class="toolbar">
+        <div class="inner">
+          <div class="tools">
+            <div class="search"><i class="icon-search"></i></div>
+			
+			<div class="account"><a></a><i class="icon-head"></i>
+			<ul class="toolbar-dropdown">
+				<li class="sub-menu-user">
+			<% if(user){ %>
+				<input type="hidden" name="user" value="<%= user.user_name %>">
+				<% if(user.facebook_id){ %>
+					<input type="hidden" name="key" value="<%= user.facebook_id %>">
+					<input type="hidden" name="url_picture_user" value="http://graph.facebook.com/<%= user.facebook_id %>/picture?type=normal">
+					<div class="user-ava"><img src="http://graph.facebook.com/<%= user.facebook_id %>/picture?type=normal" alt="<%= user.user_name %>"></div>
+				<% } else { %>
+					<input type="hidden" name="url_picture_user" value="<%= user.picture %>">
+					<div class="user-ava"><img src="<%= user.picture %>" alt="<%= user.user_name %>"></div>
+					<% if(user.google_id){ %>
+						<input type="hidden" name="key" value="<%= user.google_id %>">
+					<% } else { %>
+						<input type="hidden" name="key" value="<%= user.user_name %>">
+					<% } %>
+				<% } %>
+				  <li class="sub-menu-separator"></li>
+				  <div class="user-info">
+					<h6 class="user-name"><%= user.user_name %></h6>
+				  </div>
+				</li>
+				  <li><a href="/">My Profile</a></li>
+				<li class="sub-menu-separator"></li>
+				<li><a href="/logout"> <i class="icon-unlock"></i>Logout</a></li>
+			<% } else{ %>
+			<li name="login" data-toggle="modal" data-target="#modal_login"><i class="icon-unlock"></i>Login</li>
+		  <% } %>
+				</ul>
+			</div>
+			<% if(user){ %>
+				<% if(user.role == 'admin'){ %>
+					<div class="account"><a href="/admin_setting"></a><i class="icon-cog"></i>
 				</div>
-	        </div>
-		</div>
-		<div class="col-sm-1">
-		</div>
-	</div>
-</div>
-<br>
+				<% } %>
+			<% } %>
+					  
+            <div class="cart <% if(total_product == 0) { %> disabled<%}%>"><a href="buy_now"></a><i class="icon-bag"></i><span class="count"><%= total_product %></span><span class="subtotal">$289.68</span>
+              <div class="toolbar-dropdown">
+                <div class="dropdown-product-item"><span class="dropdown-product-remove"><i class="icon-cross"></i></span><a class="dropdown-product-thumb" href="shop-single.html"><img src="themes/img/user_default.jpg" alt="Product"></a>
+                  <div class="dropdown-product-info"><a class="dropdown-product-title" href="shop-single.html">Unionbay Park</a><span class="dropdown-product-details">1 x $43.90</span></div>
+                </div>
+                <div class="toolbar-dropdown-group">
+                  <div class="column"><span class="text-lg">Total:</span></div>
+                  <div class="column text-right"><span class="text-lg text-medium">$289.68&nbsp;</span></div>
+                </div>
+                <div class="toolbar-dropdown-group">
+                  <div class="column"><a class="btn btn-sm btn-block btn-secondary" href="cart.html">View Cart</a></div>
+                  <div class="column"><a class="btn btn-sm btn-block btn-success" href="checkout-address.html">Checkout</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>

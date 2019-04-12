@@ -30,7 +30,7 @@ var autoIncrement = require("mongodb-autoincrement");
 //var url = 'mongodb://localhost:27017/test';
 var url = 'mongodb://nhatanh285:hna2851992@ds113835.mlab.com:13835/nhatanh_test';
 // Number of page
-var numberPager = 20;
+var numberPager = 3;
 
 var connection = new connectOnce({ 
   retries: 60, 
@@ -166,8 +166,8 @@ app.use(function(req, res, next){
 var transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'nhatanh2852@gmail.com',
-    pass: 'hna2851993'
+    user: 'diennuocwartec@gmail.com',
+    pass: 'diennuocwartec123'
   }
 });
 
@@ -902,6 +902,7 @@ app.get("/buy_now", function(req, res){
 });
 
 app.post("/buy_now_next_step", function(req, res){
+  var page = 0;
 	var mailSend = req.body.email;
 	var fullUrl = req.protocol + '://' + req.get('host');
 	var cookie = req.cookies.cookieName;
@@ -938,7 +939,7 @@ app.post("/buy_now_next_step", function(req, res){
         console.log("HYML: " + infoProductHtml);
         //Send mail 
         var mailOptions = {
-          from: 'nhatanh2852@gmail.com',
+          from: 'diennuocwartec@gmail.com',
           to: mailSend,
           subject: 'Thông báo đặt hàng thành công',
           forceEmbeddedImages: true,
@@ -987,35 +988,53 @@ app.post("/buy_now_next_step", function(req, res){
 			total = productData.length;
     }
 	}
+  var resultTmp;
 	connection.when('available', function (err, db) {
+    var collectionProduct = db.collection('product');
 		var collectionType = db.collection('type_main');
-		collectionType.aggregate([{
-    	$lookup: {
-        from: "type",
-        localField: "_id",
-        foreignField: "type_main",
-        as: "type_info"
-    	}
-		}]).toArray(
-      function (err, result) {
-        if (err) {
-          console.log(err);
-        } else if (result.length) {
-          console.log("DATA: " +  JSON.stringify(result));
-          res.render("product_buy_next", {
-            products: productBuyList, 
-            total_product: 0, 
-            total_price: totalPrice.toLocaleString(), 
-            types: result,
-            user: req.user
-          });
-          productData.length =0;
+    collectionProduct.find().toArray
+    (
+      function (err, document) {
+        if (document.length) {
+          resultTmp = document.slice(numberPager*page, numberPager*page + numberPager);
         } else {
-          console.log('No document(s) found with defined "find" criteria!');
-          res.render("add_product");
+          resultTmp = [];
         }
+    		collectionType.aggregate([{
+        	$lookup: {
+            from: "type",
+            localField: "_id",
+            foreignField: "type_main",
+            as: "type_info"
+        	}
+    		}]).toArray(
+          function (err, result) {
+            if (err) {
+              console.log(err);
+            } else if (result.length) {
+              console.log("DATA: " +  JSON.stringify(result));
+              res.render("product_buy_next", {
+                products: resultTmp,
+                products_buy: productBuyList, 
+                total_product: 0, 
+                total_price: totalPrice.toLocaleString(), 
+                types: result,
+                user: req.user,
+                list: false,
+                count: (resultTmp.length/numberPager),
+                page: 0,
+                prevPager: -1,
+                nextPager: 1
+              });
+              productData.length =0;
+            } else {
+              console.log('No document(s) found with defined "find" criteria!');
+              res.render("add_product");
+            }
+          }
+        );
       }
-    );
+      );
 	});
 });
 
