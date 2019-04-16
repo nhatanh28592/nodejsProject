@@ -1,4 +1,5 @@
-
+var indexImg = 0;
+var imgShows;
 $(document).ready(function(){
 	var priceProduct = $("#price_product").text();
 	$("#price_product").text( " " + priceProduct.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + " VND");
@@ -23,6 +24,37 @@ $(document).ready(function(){
 
 	$("button[name='add_cart']").click(function(){
 		addToCart();
+	});
+
+	$("a.picture").click(function(){
+		indexImg = 0;
+		var html = $(this).html();
+		$("a.show_picture").empty();
+		$("a.show_picture").append(html.split('<img').join('<img class="img_show" ').replace('class="main-img"', 'class="main-img main_show"'));
+		imgShows = $("img.img_show");
+		$("#modalPicture").modal('show');
+	});
+
+	$("a.pre").click(function(){
+		if (indexImg == 0) {
+			indexImg = imgShows.length - 1;
+		} else {
+			indexImg = indexImg - 1;
+		}
+		var src = imgShows[indexImg].currentSrc;
+		$("div.main_show").empty();
+		$("div.main_show").append('<img src="' + src + '" alt="Category">');
+	});
+
+	$("a.next").click(function(){
+		if (indexImg == imgShows.length -1) {
+			indexImg = 0;
+		} else {
+			indexImg = indexImg + 1;
+		}
+		var src = imgShows[indexImg].currentSrc;
+		$("div.main_show").empty();
+		$("div.main_show").append('<img src="' + src + '" alt="Category">');
 	});
 
 	$(".money").each(function(){
