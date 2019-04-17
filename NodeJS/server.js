@@ -274,18 +274,7 @@ app.get("/", function(req, res){
         if (err) {
             console.log(err);
         } else {
-          var total;
-        	var cookie = req.cookies.cookieName;
-        	if (cookie == undefined) {
-        		total = 0;
-        	} else {
-        		var productData = myCache.get(cookie);
-        		if (productData == undefined) {
-        			total = 0;
-            } else{
-        			total = productData.length;
-            }
-        	}
+          var productBooking = getInfoProductBooking(req.cookies.cookieName);
     	 		collectionType.aggregate([{
 			    	$lookup: {
 			        from: "type",
@@ -307,13 +296,14 @@ app.get("/", function(req, res){
                   resultTmp = [];
                 }
     	 					res.render("index", {products: resultTmp, 
-    	 						total_product: total, types: res_type, 
+                  types: res_type, 
     	 						count: (result.length/numberPager),
     	 						prevPager: prevPager,
     	 						nextPager: nextPager,
     	 						page: page,
     	 						list: false, 
-    	 						user: req.user
+    	 						user: req.user,
+                  product_booking_data: productBooking
     	 					});
               }
             }
@@ -585,20 +575,6 @@ app.get("/product_details", function(req, res){
             if (err) {
                 console.log(err);
             } else if (result.length) {
-              console.log(result);
-              var total;
-            	var cookie = req.cookies.cookieName;
-            	console.log("cookie da co la: " + cookie)
-            	if (cookie == undefined) {
-            		total = 0;
-            	} else {
-            		var productData = myCache.get(cookie);
-            		if (productData == undefined) {
-            			total = 0;
-                } else {
-                  total = productData.length;
-                }
-            	}
 				      resultData = result;
             } else {
               console.log('No document(s) found with defined "find" criteria!');
@@ -621,17 +597,7 @@ app.get("/product_details", function(req, res){
         );
 	      collection.findOne({'_id': parseInt(req.query.productId)}, function(err, document) {
 			  	console.log("data: " + document._id);
-			  	var total;
-        	var cookie = req.cookies.cookieName;
-        	if (cookie == undefined) {
-        		total = 0;
-        	} else {
-        		var productData = myCache.get(cookie);
-        		if (productData == undefined)
-        			total = 0;
-        		else
-        			total = productData.length;
-        	}
+			  	var productBooking = getInfoProductBooking(req.cookies.cookieName);
         	collectionType.aggregate([{
 		    	$lookup: {
 		        from: "type",
@@ -648,7 +614,7 @@ app.get("/product_details", function(req, res){
  					      res.render("product_details", {
                   product: document, 
                   products: resultData.slice(numberPager*page, numberPager*page + numberPager), 
-                  total_product: total, types: res_type,
+                  types: res_type,
 	 					      count: (resultData.length/numberPager),
     	 						prevPager: prevPager,
     	 						nextPager: nextPager,
@@ -657,7 +623,8 @@ app.get("/product_details", function(req, res){
     	 					  type: req.query.type,
     	 					  productId: req.query.productId,
                   user: req.user,
-                  list_user: users
+                  list_user: users,
+                  product_booking_data: productBooking
                 });
               } else {
                 console.log('No document(s) found with defined "find" criteria!');
@@ -767,7 +734,26 @@ app.post("/buy_now", function(req, res){
 	if (cookie == null || cookie == undefined) {
 		res.send("ERROR please go home page");
 	} else {
+    var productBuy = JSON.parse('{"product_id":"' + req.body.product_id + '","product_info":[{"number":"' + req.body.input_number_product + '","name":"' + req.body.product_name + '","main_file":"' + req.body.product_main_file+ '","price":"' + req.body.price + '"}]}');
 		var productData = myCache.get(cookie);
+    if (productData == undefined) {
+      var data = [];
+      data.push(productBuy);
+      productData = data;
+      myCache.set( cookie, data, function( err, success ){
+        if( !err && success ){
+          console.log( success ); 
+        }
+      });
+    } else {
+      productData.push(productBuy);
+      myCache.set( cookie, productData, function( err, success ){
+        if( !err && success ){
+          console.log( success ); 
+        }
+      });
+    }
+
 		var productBuyList = [];
 		var productDetail;
 		var totalPrice = 0;
@@ -810,12 +796,14 @@ app.post("/buy_now", function(req, res){
                   console.log(err);
               } else if (result.length) {
                 console.log("DATA: " +  JSON.stringify(result));
+                var productBooking = getInfoProductBooking(req.cookies.cookieName);
                 res.render("product_buy", {
                   products: productBuyList, 
                   total_product: total, 
                   total_price: totalPrice.toLocaleString(), 
                   types: result,
-                  user: req.user
+                  user: req.user,
+                  product_booking_data: productBooking
                 });
               } else {
                 console.log('No document(s) found with defined "find" criteria!');
@@ -854,15 +842,6 @@ app.get("/buy_now", function(req, res){
   				};
 		  	productBuyList.push(jsonData);
 	    }
-			if (cookie == undefined) {
-				total = 0;
-			} else {
-				if (productData == undefined) {
-					total = 0;
-        } else{
-					total = productData.length;
-        }
-			}
 			connection.when('available', function (err, db) {
 		    if (err) {
 	        console.log('Unable to connect to the mongoDB server. Error:', err);
@@ -880,12 +859,13 @@ app.get("/buy_now", function(req, res){
               if (err) {
                   console.log(err);
               } else if (result.length) {
+                var productBooking = getInfoProductBooking(req.cookies.cookieName);
                 res.render("product_buy", {
                   products: productBuyList, 
-                  total_product: total, 
                   total_price: totalPrice.toLocaleString(), 
                   types: result,
-                  user: req.user
+                  user: req.user,
+                  product_booking_data: productBooking
                 });
               } else {
                 console.log('No document(s) found with defined "find" criteria!');
@@ -1013,6 +993,13 @@ app.post("/buy_now_next_step", function(req, res){
               console.log(err);
             } else if (result.length) {
               console.log("DATA: " +  JSON.stringify(result));
+              var dataRefresh = undefined;
+              myCache.set( cookie, dataRefresh, function( err, success ){
+                if( !err && success ){
+                  console.log( success ); 
+                }
+              });
+              var productBooking = getInfoProductBooking(req.cookies.cookieName);
               res.render("product_buy_next", {
                 products: resultTmp,
                 products_buy: productBuyList, 
@@ -1024,7 +1011,8 @@ app.post("/buy_now_next_step", function(req, res){
                 count: (resultTmp.length/numberPager),
                 page: 0,
                 prevPager: -1,
-                nextPager: 1
+                nextPager: 1,
+                product_booking_data: productBooking
               });
               productData.length =0;
             } else {
@@ -1416,4 +1404,33 @@ function utf8(str) {
   str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
   str = str.replace(/Đ/g, "D");
   return str;
+}
+
+function getInfoProductBooking(cookie) {
+  var total = 0;
+  var productData;
+  var totalPrice = 0;
+  if (cookie == undefined) {
+    total = 0;
+    productData = [];
+  } else {
+    productData = myCache.get(cookie);
+    if (productData == undefined) {
+      total = 0;
+      productData = [];
+    } else{
+      total = productData.length;
+      for (var i = 0; i < total; i++) {
+        var productDetail = productData[i].product_info;
+        for (var j = 0; j < productDetail.length; j++) {
+          totalPrice += parseInt(productDetail[j].price)*parseInt(productDetail[j].number);
+        }
+      }
+    }
+  }
+  return {
+    total_product: total, 
+    product_booking: productData,
+    total_price: totalPrice
+  };
 }

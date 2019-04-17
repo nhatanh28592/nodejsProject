@@ -23,8 +23,40 @@ $(document).ready(function () {
 
   $(".money_format").each(function(){
         var money = $(this).text();
-        $(this).text(money.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'));
+        $(this).text(money.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + " VND");
+  });
+
+  $("span.dropdown-product-remove").click(function(){
+    var id = $(this).next().val();
+    var root = $(this);
+    $.ajax({
+          type: 'POST',
+          url: "/delete_product_from_cart",
+          async: true,
+          data:JSON.stringify({
+                  id: id
+          }),
+          dataType: 'json',
+          contentType: 'application/json; charset=utf-8',
+          success: function (data) {  
+            swal({
+               title: "Thông báo",
+               text: "Xóa sản phẩm thành công !",
+               type: "success",
+               confirmButtonText: "close"
+            });
+            root.parent().remove(); 
+            if (data.total == 0) {
+              window.location.href = "/";
+            }
+          },
+          error: function (xhr, ajaxOptions, thrownError) { 
+            alert("error");
+            return false;
+          }
     });
+  });
+
 });
 
 $(function () {

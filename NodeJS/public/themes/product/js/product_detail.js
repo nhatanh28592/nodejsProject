@@ -91,8 +91,9 @@ function addToCart_buyNow() {
             dataType: 'json',
             contentType: 'application/json; charset=utf-8',
             success: function (data) {  
-             	$(".product_add_cart").text(data.product_total);
-             	$(".product_add_cart").parent().parent().parent().removeClass("disabled");
+             	$("span.count").text(data.product_total);
+             	$("div.cart").addClass("cart_enable");
+             	$("a.link_cart").removeClass("disabled");
              	return true;
             },
             error: function (xhr, ajaxOptions, thrownError) { 
@@ -139,8 +140,9 @@ function addToCart() {
             dataType: 'json',
             contentType: 'application/json; charset=utf-8',
             success: function (data) {  
-             	$(".product_add_cart").text(data.product_total);
-             	$(".product_add_cart").parent().parent().parent().removeClass("disabled");
+             	$("span.count").text(data.product_total);
+             	$("div.cart").addClass("cart_enable");
+             	$("a.link_cart").removeClass("disabled");
              	$('#myModal').modal('hide');
              	swal({
 					 title: "Thông báo",
@@ -148,7 +150,10 @@ function addToCart() {
 					 type: "success",
 					 confirmButtonText: "close"
 				}); 
-             	$("div.alert-success").show().fadeOut(30000);
+				
+				setTimeout(function() {
+					location.reload();
+				}, 1000);
             },
             error: function (xhr, ajaxOptions, thrownError) { 
             	alert("error");
