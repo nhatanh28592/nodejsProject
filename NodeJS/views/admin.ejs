@@ -134,16 +134,16 @@
 				</div>
 				<br/>
 				<div class="map" id="map_setting" style="display:none;">
-					<form class="form-inline input_map" action="" style="">
-						<div class="form-group">
-							<input type="text" class="form-control" placeholder="Vị trí bắt đầu"  name="map_start">
-						</div>
-						<span class="glyphicon glyphicon-circle-arrow-right"></span>
-						<div class="form-group">
-							<input type="text" class="form-control" placeholder="Vị trị kết thúc" name="map_end">
-						</div>
-						<button type="button" class="btn btn-info" id="view_map"><span class="glyphicon glyphicon-map-marker"></span> View Map</button>
-					</form>
+					<div class="form-group">
+						<b>Vị trí bắt đầu:</b>
+						<input type="text" class="form-control" placeholder="" value="138/45 Hoàng Văn Thái, quận Liên Chiểu, TP Đà Nẵng" name="map_start">
+					</div>
+					<span class="glyphicon glyphicon-circle-arrow-right"></span>
+					<div class="form-group">
+						<b>Vị trị kết thúc:</b>
+						<input type="text" class="form-control" value="138/45 Hoàng Văn Thái, quận Liên Chiểu, TP Đà Nẵng" placeholder="Vị trị kết thúc" name="map_end">
+					</div>
+					<button type="button" class="btn btn-info" id="view_map"><span class="glyphicon glyphicon-map-marker"></span> Xem MAP Giao Hàng</button>
 					<br>
 					<div id="map" style="display:none;"></div>
 				</div>
@@ -161,10 +161,19 @@
 						directionsDisplay.setMap(map);
 
 						document.getElementById('view_map').addEventListener('click', function() {
-						  $("div.map").append('<div class="loader"></div>');
-						  calculateAndDisplayRoute(directionsService, directionsDisplay);
-						  $("div.loader").hide();
-						  $("div#map").show();
+						  if($('input.map_point:checkbox:checked').length == 0) {
+						  	swal({
+							 title: "Thông báo",
+							 text: "Vui lòng chọn đơn hàng để xem Map giao hàng !",
+							 type: "error",
+							 confirmButtonText: "close"
+							}); 
+						  } else {
+						  	$("div.map").append('<div class="loader"></div>');
+						    calculateAndDisplayRoute(directionsService, directionsDisplay);
+						    $("div.loader").hide();
+						    $("div#map").show();
+						  }
 						});
 					}
 

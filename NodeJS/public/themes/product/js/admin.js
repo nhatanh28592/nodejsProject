@@ -50,6 +50,7 @@ $(document).ready(function(){
     $("button.product_booking").click(function(){
         $("#map_setting").show();
         $("div.btn-add").hide();
+        $("div#map").hide();
         $.ajax({
             type: 'POST',
             url: "/admin_product_booking",
@@ -151,12 +152,6 @@ $(document).ready(function(){
         });
     });
 
-    $("div.data").on("change", "input.map_point", function() {
-        if($(this).prop("checked")) {
-            $("form.input_map").show();
-        }
-    });
-
     $("div.data").on("change", "select#type_main_add", function() {
         var typeMain = $(this).val();
         $.ajax({
@@ -186,63 +181,81 @@ $(document).ready(function(){
 
     $("button.save_type_main").click(function() {
         var name = $("input[name='type_main_name']").val();
-        $.ajax({
-          type: 'POST',
-          url: "/add_type_main",
-          async: true,
-          data:JSON.stringify({
-            name: name
-          }),
-          dataType: 'json',
-          contentType: 'application/json; charset=utf-8',
-          success: function (data) {  
-            var html = '<option value="' + data._id + '">' + data.name + '</option>';
-            $("select#type_main_add").append(html);
-            $("select#type_main_add").val(data._id);
-            $("input[name='type_main_name']").val('');
-            $("input[name='type_main_id']").val(data._id);
-            $("select#type_add").empty();
-            swal({
-               title: "Thông báo",
-               text: "Thêm Dòng Sản Phẩm Thành Công",
-               type: "success",
-               confirmButtonText: "close"
+        if(name) {
+            $.ajax({
+              type: 'POST',
+              url: "/add_type_main",
+              async: true,
+              data:JSON.stringify({
+                name: name
+              }),
+              dataType: 'json',
+              contentType: 'application/json; charset=utf-8',
+              success: function (data) {  
+                var html = '<option value="' + data._id + '">' + data.name + '</option>';
+                $("select#type_main_add").append(html);
+                $("select#type_main_add").val(data._id);
+                $("input[name='type_main_name']").val('');
+                $("input[name='type_main_id']").val(data._id);
+                $("select#type_add").empty();
+                swal({
+                   title: "Thông báo",
+                   text: "Thêm Dòng Sản Phẩm Thành Công",
+                   type: "success",
+                   confirmButtonText: "close"
+                });
+              },
+              error: function (xhr, ajaxOptions, thrownError) { 
+                alert("error");
+              }
             });
-          },
-          error: function (xhr, ajaxOptions, thrownError) { 
-            alert("error");
-          }
-        });
+        } else {
+            swal({
+             title: "Thông báo",
+             text: "Vui lòng nhập tên Dòng Sản Phẩm !",
+             type: "error",
+             confirmButtonText: "close"
+            }); 
+        }
     });
 
     $("button.save_type").click(function() {
         var typeMain = $("input[name='type_main_id']").val();
         var name = $("input[name='type_name']").val();
-        $.ajax({
-          type: 'POST',
-          url: "/add_type",
-          async: true,
-          data:JSON.stringify({
-            type_main: typeMain,
-            name: name
-          }),
-          dataType: 'json',
-          contentType: 'application/json; charset=utf-8',
-          success: function (data) {  
-            var html = '<option value="' + data._id + '">' + data.name + '</option>';
-            $("select#type_add").append(html);
-            $("input[name='type_name']").val('');
-            swal({
-               title: "Thông báo",
-               text: "Thêm Loại Sản Phẩm Thành Công",
-               type: "success",
-               confirmButtonText: "close"
+        if (name) {
+            $.ajax({
+              type: 'POST',
+              url: "/add_type",
+              async: true,
+              data:JSON.stringify({
+                type_main: typeMain,
+                name: name
+              }),
+              dataType: 'json',
+              contentType: 'application/json; charset=utf-8',
+              success: function (data) {  
+                var html = '<option value="' + data._id + '">' + data.name + '</option>';
+                $("select#type_add").append(html);
+                $("input[name='type_name']").val('');
+                swal({
+                   title: "Thông báo",
+                   text: "Thêm Loại Sản Phẩm Thành Công",
+                   type: "success",
+                   confirmButtonText: "close"
+                });
+              },
+              error: function (xhr, ajaxOptions, thrownError) { 
+                alert("error");
+              }
             });
-          },
-          error: function (xhr, ajaxOptions, thrownError) { 
-            alert("error");
-          }
-        });
+        } else {
+            swal({
+             title: "Thông báo",
+             text: "Vui lòng nhập tên Loại Sản Phẩm !",
+             type: "error",
+             confirmButtonText: "close"
+            });
+        }
     });
 });
 
@@ -275,6 +288,7 @@ function renderTableProductBooking(data) {
     var htmlTbBody = "";
     for (var i = 0; i < data.length; i++) {
         var productBooking = data[i];
+        var totalPrice = 0;
         htmlTbBody += '<tr>';
         htmlTbBody += '<td>' + productBooking._id + '</td>';
         htmlTbBody += '<td>' + '<label>Name: </label> ' + productBooking.info_personal.name + '<br>';
@@ -286,17 +300,20 @@ function renderTableProductBooking(data) {
             productBookingInfo = productBooking.info_booking[j];
             for (var k = 0; k < productBookingInfo.product_info.length; k++) {
                 var productInfo = productBookingInfo.product_info[k];
+                var totalItem = parseInt(productInfo.price)*parseInt(productInfo.number);
+                totalPrice += totalItem;
                 htmlTbBody += '<div class="card">';
                 htmlTbBody += '<img src="upload/' + productInfo.main_file + '" width="50px" height="50px" style="padding: 2px;">';
                 htmlTbBody += '<div style="margin-left:53px;"> <label>Tên sản phẩm: </label> ' + productInfo.name + '<br>';
                 htmlTbBody += '<label>Số lượng: </label> ' + productInfo.number + '<br>';
-                htmlTbBody += '<label>Giá: </label> ' + productInfo.price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + ' VND</div></div>';
-                htmlTbBody += '<label>Tổng cộng: </label><span style="color:red" > ' + (parseInt(productInfo.price)*parseInt(productInfo.number)).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + ' VND</span>';
+                htmlTbBody += '<label>Giá: </label> ' + productInfo.price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + ' VND <br>';
+                htmlTbBody += '<label>Thành tiền: </label><span style="color:red" > ' + totalItem.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + ' VND</span></div></div>';
                 if(k != (productBookingInfo.product_info.length -1)) {
                     htmlTbBody += '<br>';
                 }
             }
         }
+        htmlTbBody += '<br><label>TỔNG CỘNG: </label><span style="color:red" > ' + totalPrice.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + ' VND</span>';
         htmlTbBody += '</td>';
         htmlTbBody += '<td class="text-center"><button type="button" class="btn btn-info"><span class="glyphicon glyphicon-edit"></span> Edit </button></td>';
         htmlTbBody += '<td class="text-center"><button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Delete </button></td>';
