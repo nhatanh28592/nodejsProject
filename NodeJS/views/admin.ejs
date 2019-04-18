@@ -105,6 +105,9 @@
 				    </thead>
 				    <tbody class="">
 				      <tr>
+				        <td><button class="setting button type"><span class="glyphicon glyphicon-tags btn-lg"> Loại Sản Phẩm</span> </button></td>
+				      </tr>
+				      <tr>
 				        <td><button class="setting button product"><span class="glyphicon glyphicon-tags btn-lg"> Sản phẩm</span> </button></td>
 				      </tr>
 				      <tr>
@@ -121,7 +124,7 @@
 	            </div>
 			</div>
 			<div class="col-sm-7" style="">
-				<div class="">
+				<div class="btn-add" style="display:none;">
 					<button class="btn btn-success add" data-toggle="modal" data-target=""><span class="glyphicon glyphicon-plus"></span> Thêm</button>
 				</div>
 				<br/>
@@ -306,6 +309,63 @@
 				</div>
 				<button type="submit" class="btn btn-primary">saveData</button>
 			  </form>
+	        </div>
+	        
+	        <!-- Modal footer -->
+	        <div class="modal-footer">
+	          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+	        </div>
+	        
+	      </div>
+	    </div>
+	  </div>
+
+	  <div class="modal fade" id="add_type_main_modal">
+	    <div class="modal-dialog modal-lg">
+	      <div class="modal-content">
+	      
+	        <!-- Modal Header -->
+	        <div class="modal-header">
+	          <h4 class="modal-title">Thêm Dòng Sản Phẩm:</h4>
+	          <button type="button" class="close" data-dismiss="modal">&times;</button>
+	        </div>
+	        
+	        <!-- Modal body -->
+	        <div class="modal-body">
+				<div class="form-group">
+					<label>Tên Dòng Sản Phẩm:</label>
+					<input type="text" class="form-control" name="type_main_name">
+				</div>
+				<button type="button" class="btn btn-primary save_type_main">Save</button>
+	        </div>
+	        
+	        <!-- Modal footer -->
+	        <div class="modal-footer">
+	          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+	        </div>
+	        
+	      </div>
+	    </div>
+	  </div>
+
+	  <div class="modal fade" id="add_type_modal">
+	    <div class="modal-dialog modal-lg">
+	      <div class="modal-content">
+	      
+	        <!-- Modal Header -->
+	        <div class="modal-header">
+	          <h4 class="modal-title">Thêm Loại Sản Phẩm:</h4>
+	          <button type="button" class="close" data-dismiss="modal">&times;</button>
+	        </div>
+	        
+	        <!-- Modal body -->
+	        <div class="modal-body">
+				<div class="form-group">
+					<label>Tên Loại Sản Phẩm:</label>
+					<input type="text" class="form-control" name="type_name">
+					<input type="hidden" class="form-control" name="type_main_id">
+				</div>
+				<button type="button" class="btn btn-primary save_type">Save</button>
 	        </div>
 	        
 	        <!-- Modal footer -->

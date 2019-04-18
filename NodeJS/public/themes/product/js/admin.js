@@ -1,6 +1,31 @@
 $(document).ready(function(){
+    $("button.type").click(function(){
+        $("div.btn-add").hide();
+        $("div.map").hide();
+        $("#map_setting").hide();
+        $("button.add").attr('data-target','#modalProduct');
+        $.ajax({
+            type: 'POST',
+            url: "/get_all_type",
+            async: true,
+            data:JSON.stringify({
+                id: null
+            }),
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {  
+                renderType(data);
+            },
+            error: function (xhr, ajaxOptions, thrownError) { 
+                alert("error");
+                return false;
+            }
+        });
+    });
+
     $("button.product").click(function(){
         $("div.map").hide();
+        $("div.btn-add").show();
         $("#map_setting").hide();
         $("button.add").attr('data-target','#modalProduct');
         $.ajax({
@@ -24,6 +49,7 @@ $(document).ready(function(){
 
     $("button.product_booking").click(function(){
         $("#map_setting").show();
+        $("div.btn-add").hide();
         $.ajax({
             type: 'POST',
             url: "/admin_product_booking",
@@ -46,6 +72,7 @@ $(document).ready(function(){
     $("button.user").click(function(){
         $("div.map").hide();
         $("#map_setting").hide();
+        $("div.btn-add").hide();
         $.ajax({
             type: 'POST',
             url: "/admin_user",
@@ -128,6 +155,91 @@ $(document).ready(function(){
         if($(this).prop("checked")) {
             $("form.input_map").show();
         }
+    });
+
+    $("div.data").on("change", "select#type_main_add", function() {
+        var typeMain = $(this).val();
+        $.ajax({
+          type: 'POST',
+          url: "/get_type_by_type_main",
+          async: true,
+          data:JSON.stringify({
+            type_main: typeMain
+          }),
+          dataType: 'json',
+          contentType: 'application/json; charset=utf-8',
+          success: function (data) {  
+            var html = "";
+            for (var i= 0; i < data.data.length; i++) {
+              var type = data.data[i];
+              html += '<option value="' + type._id + '">' + type.name + '</option>'
+            }
+            $("input[name='type_main_id']").val(data.type_main_id);
+            $("select#type_add").empty();
+            $("select#type_add").append(html);
+          },
+          error: function (xhr, ajaxOptions, thrownError) { 
+            alert("error");
+          }
+        });
+    });
+
+    $("button.save_type_main").click(function() {
+        var name = $("input[name='type_main_name']").val();
+        $.ajax({
+          type: 'POST',
+          url: "/add_type_main",
+          async: true,
+          data:JSON.stringify({
+            name: name
+          }),
+          dataType: 'json',
+          contentType: 'application/json; charset=utf-8',
+          success: function (data) {  
+            var html = '<option value="' + data._id + '">' + data.name + '</option>';
+            $("select#type_main_add").append(html);
+            $("input[name='type_main_name']").val('');
+            swal({
+               title: "Thông báo",
+               text: "Thêm Dòng Sản Phẩm Thành Công",
+               type: "success",
+               confirmButtonText: "close"
+            });
+          },
+          error: function (xhr, ajaxOptions, thrownError) { 
+            alert("error");
+          }
+        });
+    });
+
+    $("button.save_type").click(function() {
+        var typeMain = $("input[name='type_main_id']").val();
+        var name = $("input[name='type_name']").val();
+        $.ajax({
+          type: 'POST',
+          url: "/add_type",
+          async: true,
+          data:JSON.stringify({
+            type_main: typeMain,
+            name: name
+          }),
+          dataType: 'json',
+          contentType: 'application/json; charset=utf-8',
+          success: function (data) {  
+            var html = '<option value="' + data._id + '">' + data.name + '</option>';
+            $("select#type_add").append(html);
+            $("input[name='type_name']").val('');
+            swal({
+               title: "Thông báo",
+               text: "Thêm Loại Sản Phẩm Thành Công",
+               type: "success",
+               confirmButtonText: "close"
+            });
+          },
+          error: function (xhr, ajaxOptions, thrownError) { 
+            alert("error");
+          }
+        });
     });
 });
 
@@ -227,4 +339,31 @@ function renderTableUser(data) {
     htmlTbEnd += '</tbody></table>';
     $("div.data").empty();
     $("div.data").append(htmlTbStart + htmlTbBody + htmlTbEnd);
+}
+
+function renderType(data) {
+    var html = '';
+    var typeMain = data.type_main;
+    var typeMainId = typeMain[0]._id;
+    $("input[name='type_main_id']").val(typeMainId);
+    html += '<label>Dòng Sản Phẩm: </label><select class="form-control" id="type_main_add" name="type_main_add">';
+    for (var i = 0; i < typeMain.length; i++) {
+        var item = typeMain[i];
+        html += '<option value="' + item._id + '">' + item.name+ '</option>';
+    }                   
+    html += '</select><button class="btn btn-success add_type_main" data-toggle="modal" data-target="#add_type_main_modal"><span class="glyphicon glyphicon-plus"></span> Thêm</button><br><br>';
+    var type = data.type;
+    html += '<label>Loại Sản Phẩm: </label><select class="form-control" id="type_add" name="type_add">';
+    for (var i = 0; i < type.length; i++) {
+        var item = type[i];
+        if (typeMainId == item.type_main) {
+            html += '<option value="' + item._id + '">' + item.name+ '</option>';
+        }
+    }
+    html += '</select><button class="btn btn-success add_type" data-toggle="modal" data-target="#add_type_modal"><span class="glyphicon glyphicon-plus"></span> Thêm</button><br>';
+    html += '<br><label style="color:blue">Ví Dụ: </label><br>';
+    html += '<span><p style="color:red">Dòng Sản Phẩm: <p>Thiết Bị Điện</span>';
+    html += '<span><p style="color:red">Loại Sản Phẩm: <p>Dây Điện, Đèn điện, ...</span>';
+    $("div.data").empty();
+    $("div.data").append(html);
 }

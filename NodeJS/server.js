@@ -333,18 +333,6 @@ app.get("/product_list", function(req, res){
         if (err) {
           console.log(err);
         } else {
-          var total;
-        	var cookie = req.cookies.cookieName;
-        	console.log("cookie da co la: " + cookie)
-        	if (cookie == undefined) {
-        		total = 0;
-        	} else {
-        		var productData = myCache.get(cookie);
-      		if (productData == undefined)
-      			total = 0;
-      		else
-      			total = productData.length;
-        	}
 			 		collectionType.aggregate([{
 			    	$lookup: {
 				        from: "type",
@@ -357,6 +345,7 @@ app.get("/product_list", function(req, res){
               if (err) {
                   console.log(err);
               } else {
+                var productBooking = getInfoProductBooking(req.cookies.cookieName);
               	var prevPager = page - 1;
               	var nextPager = page + 1;
                 var resultTmp;
@@ -366,7 +355,7 @@ app.get("/product_list", function(req, res){
                   resultTmp = [];
                 }
     	 					res.render("index", {products: resultTmp, 
-    	 						total_product: total, types: res_type, 
+    	 						types: res_type, 
     	 						count: (result.length/numberPager),
     	 						prevPager: prevPager,
     	 						nextPager: nextPager,
@@ -374,7 +363,8 @@ app.get("/product_list", function(req, res){
     	 						list: true,
     	 						type_main: type_main,
     	 						type: type, 
-                  user: req.user
+                  user: req.user,
+                  product_booking_data: productBooking
     	 					});
               }
             }
@@ -703,18 +693,46 @@ app.post('/delete_product_from_cart',multer().array(), function (req, res) {
   }
 });
 
-app.post('/add_type',multer().array(), function (req, res) {
+app.post('/get_all_type',multer().array(), function (req, res) {
+  connection.when('available', function (err, db) {
+    var collectionTypeMain = db.collection('type_main');
+    var collectionType = db.collection('type');
+    collectionTypeMain.find().toArray(
+      function (err, result_type_main) {
+          collectionType.find().toArray(
+            function (err, result_type) {
+              res.send({type_main: result_type_main, type: result_type});
+            })
+      });
+  });
+});
+
+app.post('/add_type_main',multer().array(), function (req, res) {
 	connection.when('available', function (err, db) {
+    autoIncrement.getNextSequence(db, 'type_main', function (err, autoIndex) {
+      var collection = db.collection('type_main');
+      collection.insert({
+        _id: autoIndex,
+        name: req.body.name
+  	  });
+  	  res.send({_id: autoIndex, name: req.body.name});
+  	});
+	});
+});
+
+
+app.post('/add_type',multer().array(), function (req, res) {
+  connection.when('available', function (err, db) {
     autoIncrement.getNextSequence(db, 'type', function (err, autoIndex) {
       var collection = db.collection('type');
       collection.insert({
         _id: autoIndex,
         type_main: req.body.type_main,
         name: req.body.name
-  	  });
-  	  res.send({info: "save success"});
-  	});
-	});
+      });
+      res.send({_id: autoIndex, name: req.body.name});
+    });
+  });
 });
 
 app.post('/get_type_by_type_main',multer().array(), function (req, res) {
@@ -722,7 +740,7 @@ app.post('/get_type_by_type_main',multer().array(), function (req, res) {
     var collection = db.collection('type');
     collection.find({"type_main":req.body.type_main}).toArray(
       function (err, result) {
-        res.send({data: result});
+        res.send({data: result, type_main_id: req.body.type_main});
       }
     );
   });
