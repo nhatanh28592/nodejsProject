@@ -48,7 +48,7 @@
 			            </div></a>
 						<div class="card-body text-center">
 			                <h4 class="card-title"><%= product.info_product.name %></h4>
-			                <p class="" style="color:red; font-weight:bold;" id="price_product"><%= product.info_product.price %></p><button name="add_cart" class="btn btn-outline-primary btn-sm" href="">Thêm vào giỏ hàng</button>
+			                <p class="money_format" style="color:red; font-weight:bold;"><%= product.info_product.price %></p><button name="add_cart" class="btn btn-outline-primary btn-sm" href="">Thêm vào giỏ hàng</button>
 			            </div>
 					</div>
 				</div>
@@ -68,10 +68,10 @@
 							</div>
 							<br>
 							<div><b>Số lượng: </b> 
-								<div> <input type="number" name="input_number_product" class="form-control" value="0" min="0"/></div>
+								<div> <input type="number" name="input_number_product" class="form-control" value="1" min="1"/></div>
 							<div>
 								<br>
-								<span style="font-weight:bold;color:blue;font-size:5">Thành tiền: </span><span id="money" style="font-weight:bold;color:red;font-size:6">0 VND</span>
+								<span style="font-weight:bold;color:blue;font-size:5">Thành tiền: </span><span class="money_format" id="money" style="font-weight:bold;color:red;font-size:6"><%= product.info_product.price %></span>
 							</div>
 						</div>
 						<a href="#" id="addClass"><span class="glyphicon glyphicon-comment btn-lg"></span> Open in chat </a>
@@ -83,11 +83,10 @@
 				</div>
 				</div>		 
 			</section>
-		</div>
-		<div class="offcanvas-wrapper">
-		<%- include list_product_suguest.ejs %>  
+			<%- include list_product_suguest.ejs %>  
+			<%- include footer.ejs %>
 		</div>
 		<%- include picture_modal.ejs %>
-		<%- include footer.ejs %>
+		<%- include modal_login.ejs %>
 </body>
 </html>

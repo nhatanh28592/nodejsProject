@@ -39,15 +39,13 @@
 <div class="text-center">
 	<ul class="pagination">
 	      <a href="/?productId=<%=productId%>&type_main=<%=type_main%>&type=<%=type%>&page=<%=prevPager%>" aria-label="Previous" class="<% if(prevPager == -1) { %>disabled<%}%>">
-	        <span aria-hidden="true">&laquo;</span>
-	        <span class="sr-only">Previous</span>
+	        <span aria-hidden="true">&laquo; Pre</span>
 	      </a>
 		<% for(var i = 0; i < count; ++i) {%>
-	  		<a class="<% if(i == page) { %> active <%}%>" href="/?productId=<%=productId%>&type_main=<%=type_main%>&type=<%=type%>&page=<%=i%>"><button> <%=i+1%> </button></a>
+	  		<a class="<% if(i == page) { %> active <%}%>" href="/?productId=<%=productId%>&type_main=<%=type_main%>&type=<%=type%>&page=<%=i%>"><button class="btn"> <%=i+1%> </button></a>
 	  	<% } %>
 	      <a class="page-item <% if(nextPager > count) { %> disabled <%}%>" href="/?productId=<%=productId%>&type_main=<%=type_main%>&type=<%=type%>&page=<%=nextPager%>" aria-label="Next">
-	        <span aria-hidden="true">&raquo;</span>
-	        <span class="sr-only">Next</span>
+	        <span aria-hidden="true">Next &raquo;</span>
 	      </a>
   	</ul>
 </div>

@@ -28,9 +28,9 @@ var autoIncrement = require("mongodb-autoincrement");
  
 //var url = 'mongodb://mongodb58394-nhatanhtest.jelastic.tsukaeru.net/mongodb-connect';
 //var url = 'mongodb://localhost:27017/test';
-var url = 'mongodb://nhatanh285:hna2851992@ds113835.mlab.com:13835/nhatanh_test';
+var url = 'mongodb://adminwartec:adminwartec123@ds015849.mlab.com:15849/wartec';
 // Number of page
-var numberPager = 3;
+var numberPager = 15;
 
 var connection = new connectOnce({ 
   retries: 60, 
@@ -320,8 +320,8 @@ app.get("/product_list", function(req, res){
 	if (pageStr != undefined) {
 		page = parseInt(pageStr);
 	}
-	var type_main = req.query.type_main;
-	var type = req.query.type;
+	var type_main = parseInt(req.query.type_main);
+	var type = parseInt(req.query.type);
 	connection.when('available', function (err, db) {
     var collection = db.collection('product');
  		var collectionType = db.collection('type_main');
@@ -427,8 +427,8 @@ app.post("/add_new_product", function(req, res){
               { $set:
                 { 
                   type:{
-                    type_main : req.body.type_main,
-                    type : req.body.type
+                    type_main : parseInt(req.body.type_main),
+                    type : parseInt(req.body.type)
                   },
                   info_product: {
                     name : req.body.name,
@@ -452,8 +452,8 @@ app.post("/add_new_product", function(req, res){
                 { $set:
                   { 
                     type:{
-                      type_main : req.body.type_main,
-                      type : req.body.type
+                      type_main : parseInt(req.body.type_main),
+                      type : parseInt(req.body.type)
                     },
                     info_product: {
                       name : req.body.name,
@@ -474,8 +474,8 @@ app.post("/add_new_product", function(req, res){
             collection.insert({
               _id: autoIndex,
               type:{
-                type_main : req.body.type_main,
-                type : req.body.type
+                type_main : parseInt(req.body.type_main),
+                type : parseInt(req.body.type)
               },
               info_product: {
                 name : req.body.name,
@@ -557,8 +557,8 @@ app.get("/product_details", function(req, res){
         var collectionUsers = db.collection('users');
 	 		  collection.find({ 
           "type" : {
-		        "type_main" : req.query.type_main,
-		        "type" : req.query.type
+		        "type_main" : parseInt(req.query.type_main),
+		        "type" : parseInt(req.query.type)
 		      }
         }).toArray(
           function (err, result) {
@@ -567,8 +567,7 @@ app.get("/product_details", function(req, res){
             } else if (result.length) {
 				      resultData = result;
             } else {
-              console.log('No document(s) found with defined "find" criteria!');
-              res.send("ERROR");
+              console.log('No document(s) product');
             }
           }
 	      );
@@ -580,8 +579,7 @@ app.get("/product_details", function(req, res){
             } else if (result.length) {
               users = result;
             } else {
-              console.log('No document(s) found with defined "find" criteria!');
-              res.send("ERROR");
+              console.log('No document(s) users');
             }
           }
         );
@@ -617,8 +615,7 @@ app.get("/product_details", function(req, res){
                   product_booking_data: productBooking
                 });
               } else {
-                console.log('No document(s) found with defined "find" criteria!');
-                res.send("ERROR");
+                console.log('No document(s) product');
               }
             }
 		      );
@@ -727,7 +724,7 @@ app.post('/add_type',multer().array(), function (req, res) {
       var collection = db.collection('type');
       collection.insert({
         _id: autoIndex,
-        type_main: req.body.type_main,
+        type_main: parseInt(req.body.type_main),
         name: req.body.name
       });
       res.send({_id: autoIndex, name: req.body.name});
@@ -736,9 +733,10 @@ app.post('/add_type',multer().array(), function (req, res) {
 });
 
 app.post('/get_type_by_type_main',multer().array(), function (req, res) {
+  var typeMain = parseInt(req.body.type_main);
   connection.when('available', function (err, db) {
     var collection = db.collection('type');
-    collection.find({"type_main":req.body.type_main}).toArray(
+    collection.find({"type_main":typeMain}).toArray(
       function (err, result) {
         res.send({data: result, type_main_id: req.body.type_main});
       }
@@ -920,21 +918,24 @@ app.post("/buy_now_next_step", function(req, res){
       mainFile = "";
       try {
         var infoProductHtml = '';
+        var totalAll = 0; 
+        infoProductHtml += '<div style="margin: auto;width: 80%;border: 1px solid blue;padding: 10px;border-radius:5px">' ;
         for (var i = 0; i < productData.length; i++) {
-          infoProductHtml += '<div style="margin: auto;width: 60%;border: 2px solid red;padding: 10px;border-radius:5px">' +
-                                '<div  style="position:relative;">' + 
+          var totalPriceItem = parseInt(productData[i].product_info[0].price)*parseInt(productData[i].product_info[0].number);
+          totalAll += totalPriceItem;
+          infoProductHtml += '<div  style="position:relative;border: 1px solid #8BC34A;padding: 10px;border-radius:5px;background-color: beige;">' + 
                                   '<div><img src="' + fullUrl + '/upload/' + productData[i].product_info[0].main_file +'" alt="Logo" title="Logo" style="display:block;border: 1px solid;border-radius: 5px;" width="120" height="120" /></div>' + 
                                   '<div style="position:absolute;width:250px;right:0;top:0;">'+
                                     '<p><b>Name: </b>' + productData[i].product_info[0].name + '</p>' +
                                     '<p><b>Số lượng: </b>' + productData[i].product_info[0].number + '</p>' +
-                                    '<p><b>Màu sắc: </b>' + '<input type="color" value="' + productData[i].product_info[0].color +'" class="form-control" name="color" calss="color">' + '</p>' +
-                                    '<p><b>Giá: </b><span style="color:red"><b>'+  productData[i].product_info[0].price +'</b></span></p>' +
+                                    '<p><b>Giá: </b><span style="color:red"><b>'+  productData[i].product_info[0].price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') +' VND</b></span></p>' +
+                                    '<p><b>Thành tiền: </b><span style="color:red"><b>'+  totalPriceItem.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') +' VND</b></span></p>' +
                                   '</div>' + 
-                                '</div>' + 
-                                '<a href="'+ fullUrl +'/product_booking_detail?id=' + autoIndex + '"><button style="font-size: 20px;color: red;">XEM CHI TIẾT ĐƠN HÀNG</button></a>' +
-                              '</div> <br>';
+                                '</div> <br>';
         }
-        console.log("HYML: " + infoProductHtml);
+        infoProductHtml += '<p><b>Tổng cộng: </b><span style="color:red"><b>'+  totalAll.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') +' VND</b></span></p>';
+        infoProductHtml += '<a href="'+ fullUrl +'/product_booking_detail?id=' + autoIndex + '"><button style="font-size: 20px;color: red;">XEM CHI TIẾT ĐƠN HÀNG</button></a>'
+        infoProductHtml += '</div>' ;
         //Send mail 
         var mailOptions = {
           from: 'diennuocwartec@gmail.com',
@@ -1072,11 +1073,13 @@ app.get("/product_booking_detail", function(req, res){
           if (err) {
             console.log(err);
           } else if (res_type.length) {
+            var productBooking = getInfoProductBooking(req.cookies.cookieName);
 				    res.render("product_booking_detail", {
               product_booking: document, 
               types: res_type, total_product: total, 
               total_price :totalPrice.toLocaleString(),
-              user: req.user
+              user: req.user,
+              product_booking_data: productBooking
             });
           } else {
             console.log('No document(s) found with defined "find" criteria!');
@@ -1294,14 +1297,20 @@ app.get("/admin_setting", function(req, res){
         if (err) {
             console.log(err);
         } else {
-          console.log("ID: " + result_main[0]._id);
-          collectionType.find({"type_main":result_main[0]._id}).toArray(
-            function (err, result) {
-              res.render("admin", {
-                types: result ,
-                type_mains: result_main 
-              });
-          });
+          if (result_main.length) {
+            collectionType.find({"type_main":result_main[0]._id}).toArray(
+              function (err, result) {
+                res.render("admin", {
+                  types: result ,
+                  type_mains: result_main 
+                });
+            });
+          } else {
+            res.render("admin", {
+              types: [] ,
+              type_mains: [] 
+            });
+          }
         }
       }
     );
@@ -1381,7 +1390,7 @@ app.post('/product_info_edit',multer().array(), function (req, res) {
     var collectionTypeMain = db.collection('type_main');
     collection.findOne({'_id': parseInt(req.body.productId)}, function(err, document) {
       var type = document.type.type;
-      var typeMain = document.type.type_main;
+      var typeMain = parseInt(document.type.type_main);
       collectionTypeMain.find().toArray(
         function (err, result_type_main) {
           if (err) {

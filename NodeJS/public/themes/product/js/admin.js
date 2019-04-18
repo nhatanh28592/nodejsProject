@@ -198,7 +198,10 @@ $(document).ready(function(){
           success: function (data) {  
             var html = '<option value="' + data._id + '">' + data.name + '</option>';
             $("select#type_main_add").append(html);
+            $("select#type_main_add").val(data._id);
             $("input[name='type_main_name']").val('');
+            $("input[name='type_main_id']").val(data._id);
+            $("select#type_add").empty();
             swal({
                title: "Thông báo",
                text: "Thêm Dòng Sản Phẩm Thành Công",
@@ -283,12 +286,12 @@ function renderTableProductBooking(data) {
             productBookingInfo = productBooking.info_booking[j];
             for (var k = 0; k < productBookingInfo.product_info.length; k++) {
                 var productInfo = productBookingInfo.product_info[k];
-                htmlTbBody += '<div style="border:1px solid red;border-radius:5px;">';
+                htmlTbBody += '<div class="card">';
                 htmlTbBody += '<img src="upload/' + productInfo.main_file + '" width="50px" height="50px" style="padding: 2px;">';
                 htmlTbBody += '<div style="margin-left:53px;"> <label>Tên sản phẩm: </label> ' + productInfo.name + '<br>';
                 htmlTbBody += '<label>Số lượng: </label> ' + productInfo.number + '<br>';
-                htmlTbBody += '<label>Màu sắc: </label> <input type="color" name="" value="' + productInfo.color + '" disabled><br>';
-                htmlTbBody += '<label>Giá: </label> ' + productInfo.price + '</div></div>';
+                htmlTbBody += '<label>Giá: </label> ' + productInfo.price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + ' VND</div></div>';
+                htmlTbBody += '<label>Tổng cộng: </label><span style="color:red" > ' + (parseInt(productInfo.price)*parseInt(productInfo.number)).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + ' VND</span>';
                 if(k != (productBookingInfo.product_info.length -1)) {
                     htmlTbBody += '<br>';
                 }
@@ -344,7 +347,10 @@ function renderTableUser(data) {
 function renderType(data) {
     var html = '';
     var typeMain = data.type_main;
-    var typeMainId = typeMain[0]._id;
+    var typeMainId = 0;
+    if (typeMain[0]) {
+        typeMainId = typeMain[0]._id;
+    }
     $("input[name='type_main_id']").val(typeMainId);
     html += '<label>Dòng Sản Phẩm: </label><select class="form-control" id="type_main_add" name="type_main_add">';
     for (var i = 0; i < typeMain.length; i++) {

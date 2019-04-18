@@ -19,7 +19,7 @@ $(document).ready(function(){
    		var price = parseInt($("input[name='price']").val());
    		var total = number_choose*price;
    		$("input[name='total']").val(number_choose);
-   		$("#money").text(total + " VND");
+   		$("#money").text(total.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')  + " VND");
 	});
 
 	$("button[name='add_cart']").click(function(){
@@ -125,7 +125,7 @@ function addToCart() {
 		if (data != "" && data != "0") {
 			checkAdd = true;
 			var number = parseInt(data);
-				dataInfoProduct += '{"number":"' + number + '", "color":"' + $(this).next().val() + '", "name":"' + name  + '", "main_file":"' + product_main_file +'", "price":"' +  price*number +'"},';
+				dataInfoProduct += '{"number":"' + number + '", "color":"' + $(this).next().val() + '", "name":"' + name  + '", "main_file":"' + product_main_file +'", "price":"' +  price +'"},';
 		}
 	});
 	if (checkAdd) {
