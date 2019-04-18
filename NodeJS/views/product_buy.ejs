@@ -77,7 +77,7 @@
 			<thead>
 			  <tr>
 			    <th>Sản phẩm</th>
-			    <th>Màu sắc</th>
+			    <th>Hình ảnh</th>
 			    <th>Số lượng</th>
 			    <th>Đơn giá (VND)</th>
 			    <th>Thành tiền (VND)</th>
@@ -89,7 +89,7 @@
 				<% product.product_info.forEach(function(info, index) { %>
 					<tr>
 				     	<td><%= info.name %></td>
-				     	<td style="background-color:<%= info.color %>"></td>
+				     	<td><img src="upload/<%= info.main_file %>" width="80px" height="80px"></td>
 				    	<td><%= info.number %></td>
 				    	<td class="money_format"><%= info.price %></td>
 				    	<td class="money_format"><%= info.price*info.number %></td>
