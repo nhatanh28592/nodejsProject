@@ -83,7 +83,6 @@
 			<thead>
 			  <tr>
 			    <th>Sản phẩm</th>
-			    <th>Hình ảnh</th>
 			    <th>Số lượng</th>
 			    <th>Đơn giá (VND)</th>
 			    <th>Thành tiền (VND)</th>
@@ -94,13 +93,12 @@
 				<% products.forEach(function(product) { %>
 				<% product.product_info.forEach(function(info, index) { %>
 					<tr>
-				     	<td><%= info.name %></td>
-				     	<td><img src="upload/<%= info.main_file %>" width="80px" height="80px"></td>
+				     	<td><b><%= info.name %></b><img src="upload/<%= info.main_file %>" width="80px" height="80px"></td>
 				    	<td><%= info.number %></td>
 				    	<td class="money_format"><%= info.price %></td>
 				    	<td class="money_format"><%= info.price*info.number %></td>
 				    	<td>
-				    		<button type="button" class="btn-danger btn-sm btn-delete">
+				    		<button type="button" class="btn-delete">
 								<i class="icon-delete"></i>
 					        </button>
 					        <input type="hidden" name="id" value="<%= index %>">

@@ -283,7 +283,7 @@ function renderTableProduct(data) {
 
 function renderTableProductBooking(data) {
     var htmlTbStart = "";
-    htmlTbStart += '<table class="table table-striped" style=""><thead><tr><th style="width:5%">Id</th><th style="width:45%">Thông tin khách hàng</th><th style="width:45%">Thông tin đơn hàng</th><th style="width:5%"><span class="glyphicon glyphicon-map-marker"></span></th></thead><tbody class="">';
+    htmlTbStart += '<table class="table table-striped" style=""><thead><tr><th style="width:5%">Id</th><th style="width:45%">Thông tin đơn hàng</th><th style="width:5%"><span class="glyphicon glyphicon-map-marker"></span></th></thead><tbody class="">';
 
     var htmlTbBody = "";
     for (var i = 0; i < data.length; i++) {
@@ -291,11 +291,11 @@ function renderTableProductBooking(data) {
         var totalPrice = 0;
         htmlTbBody += '<tr>';
         htmlTbBody += '<td>' + productBooking._id + '</td>';
-        htmlTbBody += '<td>' + '<label>Name: </label> ' + productBooking.info_personal.name + '<br>';
+        htmlTbBody += '<td>' + '<label style="color:red">THÔNG TIN KHÁCH HÀNG: </label> <br><label>Tên: </label> ' + productBooking.info_personal.name + '<br>';
         htmlTbBody += '<label>Email: </label> ' + productBooking.info_personal.email + '<br>';
         htmlTbBody += '<label>SDT: </label> ' + productBooking.info_personal.mobile + '<br>';
-        htmlTbBody += '<label>Địa chỉ: </label> ' + productBooking.info_personal.address + '</td>';
-        htmlTbBody += '<td>';
+        htmlTbBody += '<label>Địa chỉ: </label> ' + productBooking.info_personal.address ;
+        htmlTbBody += '<br><label style="color:red">ĐƠN HÀNG: </label> ' ;
         for (var j = 0; j < productBooking.info_booking.length; j++) {
             productBookingInfo = productBooking.info_booking[j];
             for (var k = 0; k < productBookingInfo.product_info.length; k++) {
