@@ -34,7 +34,7 @@
 		<section class="container padding-top-3x">
 			<h3 class="text-center mb-30"><%= product.info_product.name %></h3>
 				<div class="row">
-				<div class="col-md-6 col-sm-6" style="background-color: aliceblue;">
+				<div class="col-md-6 col-sm-6" style="">
 						<div class="card mb-30"><a class="card-img-tiles picture" style="cursor: pointer;">
 						<div class="inner">
 							<div class="main-img"><img src="upload/<%= product.info_product.main_file %>" alt="Category"></div>
@@ -53,16 +53,16 @@
 					</div>
 				</div>
 
-				<div class="col-md-6 col-sm-6" style="background-color: beige;">		
+				<div class="col-md-6 col-sm-6" style="">
+					<div class="card mb-30">		
 					<form class="form-horizontal qtyFrm" action="buy_now" method="POST">
-					  <div class="control-group">
+					  <div class="control-group" style="padding:15px">
 						<input type="hidden" name="price" value="<%= product.info_product.price %>">
 						<input type="hidden" name="product_id" value="<%= product._id %>">
 						<input type="hidden" name="product_name" value="<%= product.info_product.name %>">
 						<input type="hidden" name="product_main_file" value="<%= product.info_product.main_file %>">
 						<div class="controls">
 						<div>
-						    <br>
 							<div><b>Mô tả: </b>
 								<div><%= product.info_product.description %></div>
 							</div>
@@ -80,6 +80,7 @@
 						</div>
 					  </div>
 					</form>
+					</div>
 				</div>
 				</div>		 
 			</section>

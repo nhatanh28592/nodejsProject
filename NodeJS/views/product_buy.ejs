@@ -39,11 +39,13 @@
 <section class="container padding-top-3x">
 	<h3 class="text-center mb-30">XÁC NHẬN ĐƠN HÀNG</h3>
 		<div class="row">
-		<div class="col-md-6 card col-sm-6" style="background: aliceblue;">
-			<br>
-			<h4 style="color:#FF7F50">ĐỊA CHỈ GIAO HÀNG:</h4>
+		<div class="col-md-6 col-sm-6" style="">
+			<div class="card mb-30">	
+		
 			  <form id="buy_form" action="buy_now_next_step" method="POST" onsubmit="return validate_activity();" role="form">
-			    <div class="form-group">
+			    <div style="padding:15px"> 
+			    <h4 style="color:#FF7F50">ĐỊA CHỈ GIAO HÀNG:</h4>
+			    <div class="form-group" style="">
 			      <label for="email">Email <span style="color:red;font-size:20px">*</span></label>
 			      <input type="email" class="form-control" name="email" id="email" placeholder="Nhập email" required>
 			    </div>
@@ -62,16 +64,20 @@
 				  <textarea class="form-control" rows="2" id="address" name="address" required></textarea>
 				</div>
 				<div class="form-group">
-					<label class="btn btn-info active">
-				      <input type="radio" value="1" name="pay_method" checked> Giao hàng tận nơi (Thanh toán khi nhận hàng)
-				    </label>
+					<span class="" style="color:red">
+				      <input type="hidden" value="1" name="pay_method"> 
+				      Giao hàng tận nơi (Thanh toán khi nhận hàng)
+				    </span>
 				</div>
 			    <button type="submit" class="btn btn-success text-center">ĐẶT HÀNG</button>
+			    </div>
 			  </form>
+			  </div>
 		</div>
 
-		<div class="col-md-6 card col-sm-6" style="background-color: beige;">	
-			<br>	
+		<div class="col-md-6 col-sm-6" style="">	
+			<div class="card mb-30">
+			<div style="padding:10px">
 			<h4 style="color:#FF7F50">THÔNG TIN ĐƠN HÀNG:</h4>
 			<table class="table table-bordered">
 			<thead>
@@ -105,6 +111,8 @@
 			</tbody>
 			</table>
 			<span>Tổng tiền: </span><span style="color:red"><%= total_price %> VND</span>
+			</div>
+			</div>
 		</div>
 		</div>		 
 	</section>

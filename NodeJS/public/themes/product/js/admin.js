@@ -270,8 +270,8 @@ function renderTableProduct(data) {
         htmlTbBody += '<td>' + product._id + '</td>';
         htmlTbBody += '<td>' + product.info_product.name + '</td>';
         htmlTbBody += '<td><img src="upload/'+ product.info_product.main_file + '" width="50px" height="50px"></td>';
-        htmlTbBody += '<td class="text-center"><button type="button" data-toggle="modal" data-target="#modalProductEdit" class="btn_edit btn btn-info"><span class="glyphicon glyphicon-edit"></span> Edit </button><input type="hidden" name="product_id" value="' + product._id + '"></td>';
-        htmlTbBody += '<td class="text-center"><button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Delete </button></td>';
+        htmlTbBody += '<td class="text-center"><button type="button" data-toggle="modal" data-target="#modalProductEdit" class="btn_edit btn btn-info"><span class="glyphicon glyphicon-edit"></span></button><input type="hidden" name="product_id" value="' + product._id + '"></td>';
+        htmlTbBody += '<td class="text-center"><button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span></button></td>';
         htmlTbBody += '</tr>';
     }
 
@@ -283,7 +283,7 @@ function renderTableProduct(data) {
 
 function renderTableProductBooking(data) {
     var htmlTbStart = "";
-    htmlTbStart += '<table class="table table-striped" style=""><thead><tr><th style="width:4%">Id</th><th style="width:33%">Thông tin khách hàng</th><th style="width:33%">Thông tin đơn hàng</th><th style="width:10%"></th><th style="width:10%"></th></th><th style="width:10%"><span class="glyphicon glyphicon-map-marker"></span></th></thead><tbody class="">';
+    htmlTbStart += '<table class="table table-striped" style=""><thead><tr><th style="width:5%">Id</th><th style="width:45%">Thông tin khách hàng</th><th style="width:45%">Thông tin đơn hàng</th><th style="width:5%"><span class="glyphicon glyphicon-map-marker"></span></th></thead><tbody class="">';
 
     var htmlTbBody = "";
     for (var i = 0; i < data.length; i++) {
@@ -315,8 +315,6 @@ function renderTableProductBooking(data) {
         }
         htmlTbBody += '<br><label>TỔNG CỘNG: </label><span style="color:red" > ' + totalPrice.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + ' VND</span>';
         htmlTbBody += '</td>';
-        htmlTbBody += '<td class="text-center"><button type="button" class="btn btn-info"><span class="glyphicon glyphicon-edit"></span> Edit </button></td>';
-        htmlTbBody += '<td class="text-center"><button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Delete </button></td>';
         htmlTbBody += '<td class="text-center"><label class="checkbox-inline"><input type="checkbox" class="map_point" value="' + productBooking.info_personal.address + '"></label></td>';
         htmlTbBody += '</tr>';
     }
@@ -350,8 +348,8 @@ function renderTableUser(data) {
                 htmlTbBody += '<td><img src="themes/images/user_logo.png" width="50px" height="50px" style="padding: 2px;border-radius:50%;"></td>';
             }
         }
-        htmlTbBody += '<td class="text-center"><button type="button" class="btn btn-info"><span class="glyphicon glyphicon-edit"></span> Edit </button></td>';
-        htmlTbBody += '<td class="text-center"><button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Delete </button></td>';
+        htmlTbBody += '<td class="text-center"><button type="button" class="btn btn-info"><span class="glyphicon glyphicon-edit"></span></button></td>';
+        htmlTbBody += '<td class="text-center"><button type="button" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span></button></td>';
         htmlTbBody += '</tr>';
     }
 
