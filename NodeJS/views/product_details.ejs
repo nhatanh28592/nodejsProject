@@ -40,9 +40,7 @@
 							<div class="main-img"><img src="upload/<%= product.info_product.main_file %>" alt="Category"></div>
 							<div class="thumblist">
 								<% product.file.forEach(function(file, index) { %>
-					                <% if(index != 0){ %>
 										<img src="upload/<%= file.fileName %>" alt="Category">
-									<% }; %>
 								<% }); %>
 							</div>
 			            </div></a>
