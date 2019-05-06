@@ -30,7 +30,7 @@ $(document).ready(function(){
 		indexImg = 0;
 		var html = $(this).html();
 		$("a.show_picture").empty();
-		$("a.show_picture").append(html.split('<img').join('<img class="img_show" ').replace('class="main-img"', 'class="main-img main_show"'));
+		$("a.show_picture").append(html.replace('class="main-img"', 'class="main-img main_show"'));
 		imgShows = $("img.img_show");
 		$("#modalPicture").modal('show');
 	});
