@@ -288,10 +288,16 @@ function renderTableProductBooking(data) {
     var htmlTbBody = "";
     for (var i = 0; i < data.length; i++) {
         var productBooking = data[i];
+        var date = "";
+        if (productBooking.info_booking.length > 0) {
+            date = productBooking.info_booking[0].product_info[0].date ? productBooking.info_booking[0].product_info[0].date : "";
+        }
         var totalPrice = 0;
         htmlTbBody += '<tr>';
         htmlTbBody += '<td>' + productBooking._id + '</td>';
-        htmlTbBody += '<td>' + '<label style="color:red">THÔNG TIN KHÁCH HÀNG: </label> <br><label>Tên: </label> ' + productBooking.info_personal.name + '<br>';
+        htmlTbBody += '<td>';
+        htmlTbBody += '<label style="color:red">NGÀY ĐẶT HÀNG: </label> ' + date + '<br>';
+        htmlTbBody += '<label>THÔNG TIN KHÁCH HÀNG: </label> <br><label>Tên: </label> ' + productBooking.info_personal.name + '<br>';
         htmlTbBody += '<label>Email: </label> ' + productBooking.info_personal.email + '<br>';
         htmlTbBody += '<label>SDT: </label> ' + productBooking.info_personal.mobile + '<br>';
         htmlTbBody += '<label>Địa chỉ: </label> ' + productBooking.info_personal.address ;

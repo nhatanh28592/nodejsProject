@@ -32,10 +32,11 @@
 
 		<div class="offcanvas-wrapper">
 		<section class="container padding-top-3x">
-			<h3 class="text-center mb-30"><%= product.info_product.name %></h3>
-				<div class="row">
+			<h3 class="text-center mb-30" style="color:blue"><%= product.info_product.name %></h3>
+				<div class="row" style="background-color: #ff9800">
 				<div class="col-md-6 col-sm-6" style="">
-						<div class="card mb-30"><a class="card-img-tiles picture" style="cursor: pointer;">
+					<br>
+					<div class="card mb-30"><a class="card-img-tiles picture" style="cursor: pointer;">
 						<div class="inner">
 							<div class="main-img"><img src="upload/<%= product.info_product.main_file %>" alt="Category"></div>
 							<div class="thumblist">
@@ -45,13 +46,14 @@
 							</div>
 			            </div></a>
 						<div class="card-body text-center">
-			                <h4 class="card-title"><%= product.info_product.name %></h4>
+			                <h4 class="card-title" style="color:blue"><%= product.info_product.name %></h4>
 			                <p class="money_format" style="color:red; font-weight:bold;"><%= product.info_product.price %></p><button name="add_cart" class="btn btn-outline-primary btn-sm" href="">Thêm vào giỏ hàng</button>
 			            </div>
 					</div>
 				</div>
 
 				<div class="col-md-6 col-sm-6" style="">
+					<br>
 					<div class="card mb-30">		
 					<form class="form-horizontal qtyFrm" action="buy_now" method="POST">
 					  <div class="control-group" style="padding:15px">
