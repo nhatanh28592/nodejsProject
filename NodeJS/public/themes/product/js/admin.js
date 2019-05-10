@@ -283,14 +283,17 @@ function renderTableProduct(data) {
 
 function renderTableProductBooking(data) {
     var htmlTbStart = "";
-    htmlTbStart += '<table class="table table-striped" style=""><thead><tr><th style="width:5%">Id</th><th style="width:45%">Thông tin đơn hàng</th><th style="width:5%"><span class="glyphicon glyphicon-map-marker"></span></th></thead><tbody class="">';
+    htmlTbStart += '<table class="table table-striped" style=""><thead><tr><th style="width:5%">Id</th><th style="width:70%">Thông tin đơn hàng</th><th style="width:20%">Tình Trạng</th><th style="width:5%"><span class="glyphicon glyphicon-map-marker"></span></th></thead><tbody class="">';
 
     var htmlTbBody = "";
     for (var i = 0; i < data.length; i++) {
         var productBooking = data[i];
         var date = "";
+        var deliveryFlag = "0";
         if (productBooking.info_booking.length > 0) {
-            date = productBooking.info_booking[0].product_info[0].date ? productBooking.info_booking[0].product_info[0].date : "";
+            var info = productBooking.info_booking[0].product_info[0];
+            date = info.date;
+            deliveryFlag = info.delivery_flag;
         }
         var totalPrice = 0;
         htmlTbBody += '<tr>';
@@ -320,6 +323,13 @@ function renderTableProductBooking(data) {
             }
         }
         htmlTbBody += '<br><label>TỔNG CỘNG: </label><span style="color:red" > ' + totalPrice.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + ' VND</span>';
+        htmlTbBody += '</td>';
+        htmlTbBody += '<td>';
+        if (deliveryFlag == "0") {
+            htmlTbBody += '<span style="color: green">Chưa giao hàng</span> <button type="button" data-toggle="modal" data-target="#deliveryEdit" class="btn_delivery btn btn-info"><span class="glyphicon glyphicon-cog"></span></button>';
+        } else {
+            htmlTbBody += '<span style="color: red;text-decoration: line-through;">Đã giao hàng</span>';
+        }
         htmlTbBody += '</td>';
         htmlTbBody += '<td class="text-center"><label class="checkbox-inline"><input type="checkbox" class="map_point" value="' + productBooking.info_personal.address + '"></label></td>';
         htmlTbBody += '</tr>';
