@@ -750,7 +750,7 @@ app.post("/buy_now", function(req, res){
 	if (cookie == null || cookie == undefined) {
 		res.send("ERROR please go home page");
 	} else {
-    var productBuy = JSON.parse('{"product_id":"' + req.body.product_id + '","product_info":[{"number":"' + req.body.input_number_product + '","name":"' + req.body.product_name + '","main_file":"' + req.body.product_main_file+ '","price":"' + req.body.price + '"}]}');
+    var productBuy = JSON.parse('{"product_id":"' + req.body.product_id + '","product_info":[{"delivery_flag":"' + 0 + '","date":"' + req.body.date + '","number":"' + req.body.input_number_product + '","name":"' + req.body.product_name + '","main_file":"' + req.body.product_main_file+ '","price":"' + req.body.price + '"}]}');
 		var productData = myCache.get(cookie);
     if (productData == undefined) {
       var data = [];

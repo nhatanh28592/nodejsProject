@@ -61,6 +61,18 @@
 						<input type="hidden" name="product_id" value="<%= product._id %>">
 						<input type="hidden" name="product_name" value="<%= product.info_product.name %>">
 						<input type="hidden" name="product_main_file" value="<%= product.info_product.main_file %>">
+						<input type="hidden" name="date" id="todayDate"/>
+						<script type="text/javascript">
+							function getDate(){
+							    var today = new Date();
+							    var dd = today.getDate();
+							    var mm = today.getMonth()+1; //January is 0!
+							    var yyyy = today.getFullYear();
+							    today = dd + "/" + mm + "/" + yyyy;
+							    document.getElementById("todayDate").value = today;
+							}
+							getDate();
+						</script>
 						<div class="controls">
 						<div>
 							<div><b>Mô tả: </b>

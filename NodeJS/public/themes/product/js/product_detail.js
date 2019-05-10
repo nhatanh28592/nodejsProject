@@ -71,14 +71,12 @@ function addToCart_buyNow() {
 	var price = parseInt($("input[name='price']").val());
 	var name = $("input[name='product_name']").val();
 	var product_main_file = $("input[name='product_main_file']").val();
-	$("input[name='input_number_product']").each(function(){
-		var data = $(this).val();
-		if (data != "" && data != "0") {
-			checkAdd = true;
-			var number = parseInt(data);
-				dataInfoProduct += '{"delivery_flag":"'+ 0 + '","date":"' + getDateDDMMYYY() + '","number":"' + number + '", "color":"' + $(this).next().val() + '", "name":"' + name  + '", "main_file":"' + product_main_file +'", "price":"' +  price +'"},';
-		}
-	});
+	var data = $("input[name='input_number_product']").val();
+	if (data != "" && data != "0") {
+		checkAdd = true;
+		var number = parseInt(data);
+		dataInfoProduct += '{"delivery_flag":"'+ 0 + '","date":"' + getDateDDMMYYY() + '","number":"' + number + '", "color":"' + $(this).next().val() + '", "name":"' + name  + '", "main_file":"' + product_main_file +'", "price":"' +  price +'"}';
+	}
 	if (checkAdd) {
 		$.ajax({
             type: 'POST',
@@ -86,7 +84,7 @@ function addToCart_buyNow() {
             async: true,
             data:JSON.stringify({
                     product_id: productId,
-                    product_info: JSON.parse("[" + dataInfoProduct.substring(0, dataInfoProduct.length -1) + "]")
+                    product_info: JSON.parse("[" + dataInfoProduct + "]")
             }),
             dataType: 'json',
             contentType: 'application/json; charset=utf-8',
@@ -120,14 +118,12 @@ function addToCart() {
 	var price = parseInt($("input[name='price']").val());
 	var name = $("input[name='product_name']").val();
 	var product_main_file = $("input[name='product_main_file']").val();
-	$("input[name='input_number_product']").each(function(){
-		var data = $(this).val();
-		if (data != "" && data != "0") {
-			checkAdd = true;
-			var number = parseInt(data);
-				dataInfoProduct += '{"delivery_flag":"' + 0 + '","date":"' + getDateDDMMYYY() + '","number":"' + number + '", "color":"' + $(this).next().val() + '", "name":"' + name  + '", "main_file":"' + product_main_file +'", "price":"' +  price +'"},';
-		}
-	});
+	var data = $("input[name='input_number_product']").val();
+	if (data != "" && data != "0") {
+		checkAdd = true;
+		var number = parseInt(data);
+			dataInfoProduct += '{"delivery_flag":"' + 0 + '","date":"' + getDateDDMMYYY() + '","number":"' + number + '", "color":"' + $(this).next().val() + '", "name":"' + name  + '", "main_file":"' + product_main_file +'", "price":"' +  price +'"}';
+	}
 	if (checkAdd) {
 		$.ajax({
             type: 'POST',
@@ -135,7 +131,7 @@ function addToCart() {
             async: true,
             data:JSON.stringify({
                     product_id: productId,
-                    product_info: JSON.parse("[" + dataInfoProduct.substring(0, dataInfoProduct.length -1) + "]")
+                    product_info: JSON.parse("[" + dataInfoProduct + "]")
             }),
             dataType: 'json',
             contentType: 'application/json; charset=utf-8',

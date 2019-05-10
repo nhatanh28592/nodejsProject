@@ -38,8 +38,3 @@ $(document).ready(function(){
     });
   });
 });
-
-function validate_activity() {
-	var error  = validate.single($("input[name='email']").val(), {presence: true, email: true});
-	return error;
-}
