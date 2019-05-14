@@ -379,6 +379,27 @@
 	      </div>
 	    </div>
 	  </div>
+
+	   <div class="modal fade" id="deliveryUpdate" role="dialog">
+	    <div class="modal-dialog modal-sm">
+	      <div class="modal-content">
+	        <div class="modal-header">
+	          <button type="button" class="close" data-dismiss="modal">&times;</button>
+	          <h4 class="modal-title">Tình trạng đơn hàng</h4>
+	        </div>
+	        <div class="modal-body text-center">
+	            <button href="#" class="btn btn-success btn-lg delivery_success">
+		          <span class="glyphicon glyphicon-check"></span> Đã giao hàng
+		        </button>
+		        <input type="hidden" name="product_booking_id">
+	        </div>
+	        <div class="modal-footer">
+	          <button type="button" class="btn btn-default close_delivery_modal" data-dismiss="modal">Close</button>
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+
 	<%- include footer.ejs %>
 	<script src="themes/js/jquery.js" type="text/javascript"></script>
 </body>

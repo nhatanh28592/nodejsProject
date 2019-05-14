@@ -257,6 +257,37 @@ $(document).ready(function(){
             });
         }
     });
+
+    $("div.data").on("click", "button.btn_delivery", function() {
+        $("input[name='product_booking_id']").val($(this).next().val());
+    });
+
+    $("button.delivery_success").click(function(){
+        var id = $(this).next().val();
+        $.ajax({
+          type: 'POST',
+          url: "/delivery_update",
+          async: true,
+          data:JSON.stringify({
+            id: id
+          }),
+          dataType: 'json',
+          contentType: 'application/json; charset=utf-8',
+          success: function (data) { 
+            $("button.close_delivery_modal").click(); 
+            swal({
+               title: "Thông báo",
+               text: "Chỉnh sửa tình trạng đơn hàng thành công!",
+               type: "success",
+               confirmButtonText: "close"
+            });
+            $("button.product_booking").click();
+          },
+          error: function (xhr, ajaxOptions, thrownError) { 
+            alert("error");
+          }
+        });
+    });
 });
 
 function renderTableProduct(data) {
@@ -289,11 +320,10 @@ function renderTableProductBooking(data) {
     for (var i = 0; i < data.length; i++) {
         var productBooking = data[i];
         var date = "";
-        var deliveryFlag = "0";
+        var deliveryFlag = productBooking.info_personal.delivery_flag;
         if (productBooking.info_booking.length > 0) {
             var info = productBooking.info_booking[0].product_info[0];
             date = info.date;
-            deliveryFlag = info.delivery_flag;
         }
         var totalPrice = 0;
         htmlTbBody += '<tr>';
@@ -326,7 +356,7 @@ function renderTableProductBooking(data) {
         htmlTbBody += '</td>';
         htmlTbBody += '<td>';
         if (deliveryFlag == "0") {
-            htmlTbBody += '<span style="color: green">Chưa giao hàng</span> <button type="button" data-toggle="modal" data-target="#deliveryEdit" class="btn_delivery btn btn-info"><span class="glyphicon glyphicon-cog"></span></button>';
+            htmlTbBody += '<span style="color: green">Chưa giao hàng</span> <button type="button" data-toggle="modal" data-target="#deliveryUpdate" class="btn_delivery btn btn-info"><span class="glyphicon glyphicon-cog"></span></button> <input type="hidden" value="' +  productBooking._id + '">';
         } else {
             htmlTbBody += '<span style="color: red;text-decoration: line-through;">Đã giao hàng</span>';
         }

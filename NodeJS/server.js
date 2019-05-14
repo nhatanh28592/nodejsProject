@@ -744,6 +744,21 @@ app.post('/get_type_by_type_main',multer().array(), function (req, res) {
   });
 });
 
+app.post("/delivery_update", function(req, res){
+  connection.when('available', function (err, db) {
+    var collection = db.collection('product_booking');
+    collection.update(
+      { _id: parseInt(req.body.id) },
+      { $set:
+        {
+          'info_personal.delivery_flag' : "1"
+        }
+      }
+    );
+    res.send({status: "ok"});
+  });
+});
+
 app.post("/buy_now", function(req, res){
 	console.log("data:" + req.body.product_id);
 	var cookie = req.cookies.cookieName;
