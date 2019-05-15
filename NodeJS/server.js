@@ -75,7 +75,7 @@ passport.use(new GoogleStrategy({
 passport.use(new FacebookStrategy({
     clientID: "1600240390119279",
     clientSecret: "e45ef0c2e066b8fcd9c26aec04a8bfcb",
-    callbackURL: "http://35.237.60.177:3000/auth/facebook/callback"
+    callbackURL: "https://35.237.60.177:3000/auth/facebook/callback"
   },
   function(accessToken, refreshToken, profile, done) {
     console.log("DA CHAY VO DAY NHA ID: " + profile.id );
