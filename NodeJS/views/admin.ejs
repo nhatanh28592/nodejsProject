@@ -77,11 +77,16 @@
 			0% { transform: rotate(0deg); }
 			100% { transform: rotate(360deg); }
 		}
+
+		#scrollarea {
+			overflow-y: scroll;
+			height: 800px;
+		}
 	</style>
   </head>
 <body>
 	<nav class="navbar navbar-default">
-	  <div class="container-fluid" style="background-color: cyan;">
+	  <div class="container-fluid" style="background-color: #c9d35e;">
 	    <div class="navbar-header">
 	      <a class="navbar-brand" href="/">
 	      	<img src="themes/img/logo.gif" style="height:50px; width:50px">
@@ -94,9 +99,9 @@
 	  </div>
 	</nav>
 	<div class="offcanvas-wrapper">
-	<section class="padding-top-1x">
+	<section class="padding-top-1x" style="background-color: beige;">
 		<div class="row">
-			<div class="col-md-3 card col-sm-3 text-center">
+			<div class="col-md-3 card col-sm-3 text-center" style="background-color: beige;">
 				<div style="">
 					<h4><span class="glyphicon glyphicon-cog btn-lg"></span>Cài đặt website</h4>
 	            </div>
@@ -127,7 +132,7 @@
 				  </table>
 	            </div>
 			</div>
-			<div class="col-md-8 card col-sm-8" style="">
+			<div class="col-md-8 card col-sm-8" style="" id="scrollarea">
 				<div class="btn-add" style="display:none;">
 					<button class="btn btn-success add" data-toggle="modal" data-target=""><span class="glyphicon glyphicon-plus"></span> Thêm</button>
 				</div>
