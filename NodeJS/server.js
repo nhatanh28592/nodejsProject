@@ -28,7 +28,7 @@ var autoIncrement = require("mongodb-autoincrement");
  
 //var url = 'mongodb://mongodb58394-nhatanhtest.jelastic.tsukaeru.net/mongodb-connect';
 //var url = 'mongodb://localhost:27017/test';
-var url = 'mongodb://adminwartec:adminwartec123@ds015849.mlab.com:15849/wartec';
+var url = 'mongodb://mega_milky:mega1234@ds149998.mlab.com:49998/mega_milky';
 // Number of page
 var numberPager = 15;
 
