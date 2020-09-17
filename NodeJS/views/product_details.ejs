@@ -33,7 +33,7 @@
 		<div class="offcanvas-wrapper" style="background-color: #f5f5f5;">
 		<section class="container padding-top-1x" style="background-color:white;">
 			<h3 class="text-center mb-30" style="color:blue"><%= product.info_product.name %></h3>
-				<div class="row" style="background-color: #ff9800">
+				<div class="row" style="background: #006fba;">
 				<div class="col-md-6 col-sm-6" style="">
 					<br>
 					<div class="card mb-30"><a class="card-img-tiles picture" style="cursor: pointer;">
@@ -74,8 +74,8 @@
 						</script>
 						<div class="controls">
 						<div>
-							<div><b>Mô tả: </b>
-								<div><%= product.info_product.description %></div>
+							<div><h3>THÔNG TIN SẢN PHẨM: </h3>
+								<div style="white-space: pre-wrap;"><%= product.info_product.description %></div>
 							</div>
 							<br>
 							<div><b>Số lượng: </b> 
@@ -85,7 +85,7 @@
 								<span style="font-weight:bold;color:blue;font-size:5">Thành tiền: </span><span class="money_format" id="money" style="font-weight:bold;color:red;font-size:6"><%= product.info_product.price %></span>
 							</div>
 						</div>
-						<a href="#" id="addClass"><span class="glyphicon glyphicon-comment btn-lg"></span> Open in chat </a>
+						<!-- <a href="#" id="addClass"><span class="glyphicon glyphicon-comment btn-lg"></span> Open in chat </a> -->
 						<br>
 						<button type="submit" class="btn btn-large btn-danger" style="font-weight:bold;">MUA NGAY</button>
 						</div>
@@ -94,6 +94,34 @@
 					</div>
 				</div>
 				</div>		 
+			</section>
+			<section class="container padding-top-1x" style="background-color:white;">
+				<h3 class="text-center" style="color:blue"><%= product.info_product.name %></h3>
+				<h4 class="text-center" style="color:red">LIÊN HỆ: 0972.981.498</h4>
+				<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">ĐỐI TƯỢNG SỬ DỤNG:</h4>
+				<div style="white-space: pre-wrap;font-size: 18px;color: rgb(0, 100, 0);"><%= product.info_product.dt %></div>
+				<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">CÔNG DỤNG:</h4>
+				<div style="white-space: pre-wrap;font-size: 18px;color: rgb(0, 100, 0);"><%= product.info_product.cd %></div>
+				<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">ĐÓNG GÓI:</h4>
+				<div style="white-space: pre-wrap;font-size: 18px;color: rgb(0, 100, 0);"><%= product.info_product.dg %></div>
+				<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">HƯỚNG DẪN SỬ DỤNG VÀ BẢO QUẢN:</h4>
+				<div style="white-space: pre-wrap;font-size: 18px;color: rgb(0, 100, 0);"><%= product.info_product.hd %></div>
+				<% product.file.forEach(function(file, index) { %>
+					<% if(index == 1) { %>
+						<div class="text-center main-img"><img src="upload/<%= file.fileName %>" alt="Category"></div>
+					<% } %>
+				<% }) %>
+				<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">THẬN TRỌNG:</h4>
+				<div style="white-space: pre-wrap;font-size: 18px;color: rgb(0, 100, 0);"><%= product.info_product.tt %></div>
+				<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">CHÚ Ý:</h4>
+				<div style="white-space: pre-wrap;font-size: 18px;color: rgb(0, 100, 0);"><%= product.info_product.cy %></div>
+				<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">THÔNG TIN DINH DƯỠNG:</h4>
+				<% product.file.forEach(function(file, index) { %>
+					<% if(index == 2) { %>
+						<div class="text-center main-img"><img src="upload/<%= file.fileName %>" alt="Category"></div>
+					<% } %>
+				<% }) %>
+				<h3 class="" style="color:red;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">LIÊN HỆ: 0972.981.498</h3>
 			</section>
 			<%- include list_product_suguest.ejs %>  
 			<%- include footer.ejs %>
