@@ -140,7 +140,15 @@ $(document).ready(function(){
 
                 $("input[name='name']", "#modalProductEdit").val(productData.info_product.name);
                 $("input[name='price']", "#modalProductEdit").val(productData.info_product.price);
-                $("input[name='description']", "#modalProductEdit").val(productData.info_product.description);
+                $("input[name='price_actual']", "#modalProductEdit").val(productData.info_product.price_actual);
+                $("input[name='sale']", "#modalProductEdit").val(productData.info_product.sale);
+                $("textarea[name='description']", "#modalProductEdit").val(productData.info_product.description);
+                $("textarea[name='dt']", "#modalProductEdit").val(productData.info_product.dt);
+                $("textarea[name='cd']", "#modalProductEdit").val(productData.info_product.cd);
+                $("textarea[name='cy']", "#modalProductEdit").val(productData.info_product.cy);
+                $("textarea[name='dg']", "#modalProductEdit").val(productData.info_product.dg);
+                $("textarea[name='hd']", "#modalProductEdit").val(productData.info_product.hd);
+                $("textarea[name='tt']", "#modalProductEdit").val(productData.info_product.tt);
 
                 $("input[name='product_id']", "#modalProductEdit").val(productData._id);
 

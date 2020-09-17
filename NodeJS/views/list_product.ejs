@@ -17,9 +17,8 @@
 			<div class="inner">
 				<div class="main-img"><img src="upload/<%= product.info_product.main_file %>" alt="Category"></div>
 				<div class="thumblist">
-				<% product.file.forEach(function(file, index) { %>
-					<img src="upload/<%= file.fileName %>" alt="Category">
-				<% }); %>
+					<p class="money_format" style="color:red; font-weight:bold;text-decoration: line-through;" ><%= product.info_product.price_actual %></p>
+					<div class="product-badge text-danger">Sale <%= product.info_product.sale %>% Off</div>
 				</div>
             </div></a>
 			<div class="card-body text-center">

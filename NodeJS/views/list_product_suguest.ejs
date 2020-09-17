@@ -15,13 +15,16 @@
 	<div class="col-md-3 col-sm-6">
 		<div class="grid-item">
 			<div class="product-card">
-			  <div class="product-badge text-danger">22% Off</div>
+			  <div class="product-badge text-danger">Sale <%= product.info_product.sale %>% Off</div>
 			  <a class="product-thumb" href="product_details?productId=<%= product._id %>&type_main=<%= product.type.type_main %>&type=<%= product.type.type %>">
 				<img src="upload/<%= product.info_product.main_file %>" alt="Product">
 			  </a>
 			  <h3 class="product-title"><a href="product_details?productId=<%= product._id %>&type_main=<%= product.type.type_main %>&type=<%= product.type.type %>"><%= product.info_product.name %></a></h3>
 			  <h4 class="product-price">
 				<p class="money_format" style="color:red; font-weight:bold;" ><%= product.info_product.price %></p>
+			  </h4>
+			  <h4 class="product-price">
+				<p class="money_format" style="color:red; font-weight:bold;text-decoration: line-through;" ><%= product.info_product.price_actual %></p>
 			  </h4>
 			  <div class="product-buttons">
 				<button class="btn btn-outline-secondary btn-sm btn-wishlist" data-toggle="tooltip" title="" data-original-title="Whishlist"><i class="icon-heart"></i></button>
