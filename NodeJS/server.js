@@ -166,8 +166,8 @@ app.use(function(req, res, next){
 var transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'diennuocwartec@gmail.com',
-    pass: 'diennuocwartec123'
+    user: 'shopsuadanang.info@gmail.com',
+    pass: 'shopsuadanang123'
   }
 });
 
@@ -268,7 +268,7 @@ app.get("/", function(req, res){
 	connection.when('available', function (err, db) {
     var collection = db.collection('product');
     var collectionType = db.collection('type_main');
-    collection.find({"info_product.name_utf":new RegExp(utf8(search), "i")}).toArray
+    collection.find({"info_product.name_utf":new RegExp(utf8(search), "i")}).sort( { "_id": -1 } ).toArray
     (
       function (err, result) {
         if (err) {
@@ -328,7 +328,7 @@ app.get("/product_list", function(req, res){
     collection.find({ "type" : {
       "type_main" : type_main,
       "type" : type
-    }}).toArray(
+    }}).sort( { "_id": -1 } ).toArray(
       function (err, result) {
         if (err) {
           console.log(err);
@@ -978,7 +978,7 @@ app.post("/buy_now_next_step", function(req, res){
         //Send mail 
         var mailOptions = {
           from: 'diennuocwartec@gmail.com',
-          to: mailSend,
+          to: mailSend + ", vankhoi.ks@gmail.com",
           subject: 'Thông báo đặt hàng thành công',
           forceEmbeddedImages: true,
           html: '<div style="margin: auto;width: 60%;border: 3px solid #73AD21;padding: 10px;border-radius: 10px;">' + 
@@ -986,9 +986,9 @@ app.post("/buy_now_next_step", function(req, res){
                   '<p>Xin chào ! <span style="color:red">'+ req.body.name +'</span> chúng tôi đã nhận được đơn đặt hàng của bạn, cảm ơn vì đã đặt hàng của chúng tôi, chúng tôi sẽ liên hệ và giao hàng đến bạn một cách sớm nhất</p>' +
                   infoProductHtml +
                   '<div>' +
-                    '<img src="' + fullUrl + '/themes/img/logo.gif" alt="Logo" title="Logo" style="display:block;" /> <br> <b>ĐIỆN NƯỚC WARTEC</b>' +
-                    '<br><br><p>ĐC : 138/45 Hoàng Văn Thái, quận Liên Chiểu, TP Đà Nẵng</p>' +
-                    '<p>SDT: 0389.501.059 - 0946.276370</p>' +
+                    '<img src="' + fullUrl + '/themes/img/logo.png" alt="Logo" title="Logo" style="display:block;" /> <br> <b>SHOP SỮA ĐÀ NẴNG</b>' +
+                    '<br><br><p>ĐC : 66 Hòa Minh 15-p. Hòa Minh-Q.Liên Chiểu-Tp. Đà Nẵng</p>' +
+                    '<p>SDT: 0972.981.498</p>' +
                   '</div>' +
                 '</div>'
         };

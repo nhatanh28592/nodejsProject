@@ -39,46 +39,7 @@
       <div class="toolbar">
         <div class="inner">
           <div class="tools">
-            <div class="search" style="background-color: yellowgreen;"><i class="icon-search"></i></div>
-			
-			<div class="account" style="background-color: beige;"><a></a><i class="icon-head"></i>
-			<ul class="toolbar-dropdown">
-				<li class="sub-menu-user">
-			<% if(user){ %>
-				<input type="hidden" name="user" value="<%= user.user_name %>">
-				<% if(user.facebook_id){ %>
-					<input type="hidden" name="key" value="<%= user.facebook_id %>">
-					<input type="hidden" name="url_picture_user" value="http://graph.facebook.com/<%= user.facebook_id %>/picture?type=normal">
-					<div class="user-ava"><img src="http://graph.facebook.com/<%= user.facebook_id %>/picture?type=normal" alt="<%= user.user_name %>"></div>
-				<% } else { %>
-					<input type="hidden" name="url_picture_user" value="<%= user.picture %>">
-					<div class="user-ava"><img src="<%= user.picture %>" alt="<%= user.user_name %>"></div>
-					<% if(user.google_id){ %>
-						<input type="hidden" name="key" value="<%= user.google_id %>">
-					<% } else { %>
-						<input type="hidden" name="key" value="<%= user.user_name %>">
-					<% } %>
-				<% } %>
-				  <li class="sub-menu-separator"></li>
-				  <div class="user-info">
-					<h6 class="user-name"><%= user.user_name %></h6>
-				  </div>
-				</li>
-				  <li><a href="/">My Profile</a></li>
-				<li class="sub-menu-separator"></li>
-				<li><a href="/logout"> <i class="icon-unlock"></i>Logout</a></li>
-			<% } else{ %>
-			<li name="login" data-toggle="modal" data-target="#modal_login"><i class="icon-unlock"></i>Login</li>
-		  <% } %>
-				</ul>
-			</div>
-			<% if(user){ %>
-				<% if(user.role == 'admin'){ %>
-					<div class="account"><a href="/admin_setting"></a><i class="icon-cog"></i>
-				</div>
-				<% } %>
-			<% } %>
-					  
+            <div class="search" style="background-color: yellowgreen;"><i class="icon-search"></i></div>					  
             <div style="background-color: darkgray;"class="cart <% if(product_booking_data.total_product != 0) { %> cart_enable<%}%>"><a href="buy_now" class="link_cart <% if(product_booking_data.total_product == 0) { %> disabled<%}%>"></a><i class="icon-bag"></i><span class="count" style="font-size:20px;color:red"><%= product_booking_data.total_product %></span><span class="subtotal money_format" style="color:red"><%= product_booking_data.total_price %></span>
               <div class="toolbar-dropdown">
               <% product_booking_data.product_booking.forEach(function(product) { %>

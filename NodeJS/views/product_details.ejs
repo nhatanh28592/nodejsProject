@@ -98,29 +98,43 @@
 			<section class="container padding-top-1x" style="background-color:white;">
 				<h3 class="text-center" style="color:blue"><%= product.info_product.name %></h3>
 				<h4 class="text-center" style="color:red">LIÊN HỆ: 0972.981.498</h4>
-				<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">ĐỐI TƯỢNG SỬ DỤNG:</h4>
-				<div style="white-space: pre-wrap;font-size: 18px;color: rgb(0, 100, 0);"><%= product.info_product.dt %></div>
-				<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">CÔNG DỤNG:</h4>
-				<div style="white-space: pre-wrap;font-size: 18px;color: rgb(0, 100, 0);"><%= product.info_product.cd %></div>
-				<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">ĐÓNG GÓI:</h4>
-				<div style="white-space: pre-wrap;font-size: 18px;color: rgb(0, 100, 0);"><%= product.info_product.dg %></div>
-				<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">HƯỚNG DẪN SỬ DỤNG VÀ BẢO QUẢN:</h4>
-				<div style="white-space: pre-wrap;font-size: 18px;color: rgb(0, 100, 0);"><%= product.info_product.hd %></div>
-				<% product.file.forEach(function(file, index) { %>
-					<% if(index == 1) { %>
-						<div class="text-center main-img"><img src="upload/<%= file.fileName %>" alt="Category"></div>
-					<% } %>
-				<% }) %>
-				<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">THẬN TRỌNG:</h4>
-				<div style="white-space: pre-wrap;font-size: 18px;color: rgb(0, 100, 0);"><%= product.info_product.tt %></div>
-				<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">CHÚ Ý:</h4>
-				<div style="white-space: pre-wrap;font-size: 18px;color: rgb(0, 100, 0);"><%= product.info_product.cy %></div>
-				<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">THÔNG TIN DINH DƯỠNG:</h4>
-				<% product.file.forEach(function(file, index) { %>
-					<% if(index == 2) { %>
-						<div class="text-center main-img"><img src="upload/<%= file.fileName %>" alt="Category"></div>
-					<% } %>
-				<% }) %>
+				<% if(product.info_product.dt) { %>
+					<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">ĐỐI TƯỢNG SỬ DỤNG:</h4>
+					<div style="white-space: pre-wrap;font-size: 18px;color: rgb(0, 100, 0);"><%= product.info_product.dt %></div>
+				<% } %>
+				<% if(product.info_product.cd) { %>
+					<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">CÔNG DỤNG:</h4>
+					<div style="white-space: pre-wrap;font-size: 18px;color: rgb(0, 100, 0);"><%= product.info_product.cd %></div>
+				<% } %>
+				<% if(product.info_product.dg) { %>
+					<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">ĐÓNG GÓI:</h4>
+					<div style="white-space: pre-wrap;font-size: 18px;color: rgb(0, 100, 0);"><%= product.info_product.dg %></div>
+				<% } %>
+				<% if(product.info_product.hd) { %>
+					<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">HƯỚNG DẪN SỬ DỤNG VÀ BẢO QUẢN:</h4>
+					<div style="white-space: pre-wrap;font-size: 18px;color: rgb(0, 100, 0);"><%= product.info_product.hd %></div>
+					<% product.file.forEach(function(file, index) { %>
+						<% if(index == 1) { %>
+							<div class="text-center main-img"><img src="upload/<%= file.fileName %>" alt="Category"></div>
+						<% } %>
+					<% }) %>
+				<% } %>
+				<% if(product.info_product.tt) { %>
+					<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">THẬN TRỌNG:</h4>
+					<div style="white-space: pre-wrap;font-size: 18px;color: rgb(0, 100, 0);"><%= product.info_product.tt %></div>
+				<% } %>
+				<% if(product.info_product.cy) { %>
+					<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">CHÚ Ý:</h4>
+					<div style="white-space: pre-wrap;font-size: 18px;color: rgb(0, 100, 0);"><%= product.info_product.cy %></div>
+				<% } %>
+				<% if(product.file.length == 3) { %>
+					<h4 class="" style="color:blue;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">THÔNG TIN DINH DƯỠNG:</h4>
+					<% product.file.forEach(function(file, index) { %>
+						<% if(index == 2) { %>
+							<div class="text-center main-img"><img src="upload/<%= file.fileName %>" alt="Category"></div>
+						<% } %>
+					<% }) %>
+				<% } %>
 				<h3 class="" style="color:red;font-weight: bold;margin-top: 5px;margin-bottom: 2px;text-decoration: underline;">LIÊN HỆ: 0972.981.498</h3>
 			</section>
 			<%- include list_product_suguest.ejs %>  
