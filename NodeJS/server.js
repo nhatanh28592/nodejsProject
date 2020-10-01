@@ -963,7 +963,7 @@ app.post("/buy_now_next_step", function(req, res){
           var totalPriceItem = parseInt(productData[i].product_info[0].price)*parseInt(productData[i].product_info[0].number);
           totalAll += totalPriceItem;
           infoProductHtml += '<div  style="position:relative;border: 1px solid #8BC34A;padding: 10px;border-radius:5px;background-color: beige;">' + 
-                                  '<div><img src="' + fullUrl + '/upload/' + productData[i].product_info[0].main_file +'" alt="Logo" title="Logo" style="display:block;border: 1px solid;border-radius: 5px;" width="120" height="120" /></div>' + 
+                                  '<div><img src="' + fullUrl + '/upload/' + productData[i].product_info[0].main_file +'" alt="Logo" title="Logo" style="display:block;border: 1px solid;border-radius: 5px;" width="120" height="150" /></div>' + 
                                   '<div style="position:absolute;width:250px;right:0;top:0;">'+
                                     '<p><b>Name: </b>' + productData[i].product_info[0].name + '</p>' +
                                     '<p><b>Số lượng: </b>' + productData[i].product_info[0].number + '</p>' +
@@ -973,7 +973,7 @@ app.post("/buy_now_next_step", function(req, res){
                                 '</div> <br>';
         }
         infoProductHtml += '<p><b>Tổng cộng: </b><span style="color:red"><b>'+  totalAll.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') +' VND</b></span></p>';
-        infoProductHtml += '<a href="'+ fullUrl +'/product_booking_detail?id=' + autoIndex + '"><button style="font-size: 20px;color: red;">XEM CHI TIẾT ĐƠN HÀNG</button></a>'
+        infoProductHtml += '<a href="'+ 'shopsuadanang.com/product_booking_detail?id=' + autoIndex + '"><button style="font-size: 20px;color: red;">XEM CHI TIẾT ĐƠN HÀNG</button></a>'
         infoProductHtml += '</div>' ;
         //Send mail 
         var mailOptions = {
@@ -986,7 +986,7 @@ app.post("/buy_now_next_step", function(req, res){
                   '<p>Xin chào ! <span style="color:red">'+ req.body.name +'</span> chúng tôi đã nhận được đơn đặt hàng của bạn, cảm ơn vì đã đặt hàng của chúng tôi, chúng tôi sẽ liên hệ và giao hàng đến bạn một cách sớm nhất</p>' +
                   infoProductHtml +
                   '<div>' +
-                    '<img src="' + fullUrl + '/themes/img/logo.png" alt="Logo" title="Logo" style="display:block;" /> <br> <b>SHOP SỮA ĐÀ NẴNG</b>' +
+                    '<img src="' + fullUrl + '/themes/img/logo_mail.png" alt="Logo" title="Logo" style="display:block;" /> <br> <b>SHOP SỮA ĐÀ NẴNG</b>' +
                     '<br><br><p>ĐC : 66 Hòa Minh 15-p. Hòa Minh-Q.Liên Chiểu-Tp. Đà Nẵng</p>' +
                     '<p>SDT: 0972.981.498</p>' +
                   '</div>' +
